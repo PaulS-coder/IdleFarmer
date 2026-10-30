@@ -1,0 +1,195 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_canonical_codec.gd
+* test_encoding_and_digest_match_independent_oracle
+* test_round_trip_is_lossless_at_int64_bounds
+* test_key_insertion_order_does_not_change_digest
+* test_digest_distinguishes_type_and_order
+* test_rejects_unsupported_values
+* test_decode_rejects_malformed_and_noncanonical_input
+6/6 passed.
+
+
+res://tests/unit/test_command_envelope.gd
+* test_commands_round_trip_through_replay_records
+* test_accepted_envelope_cannot_be_edited_through_accessors
+* test_envelope_well_formedness
+* test_unknown_or_malformed_records_do_not_decode
+* test_command_result_round_trip
+* test_replay_high_water_survives_cache_eviction
+* test_epoch_retirement_makes_old_commands_stale
+* test_failure_precedence_lists_every_m01_code_once
+8/8 passed.
+
+
+res://tests/unit/test_content_registry.gd
+* test_manifest_validates_with_stable_id
+* test_all_fifteen_crops_match_frs
+* test_wheat_and_corn_exact_microseconds
+* test_research_rows_and_gates
+* test_wheat_is_the_only_start_unlock
+* test_skills_and_point_capacity
+* test_returned_definitions_are_copies
+* test_registry_is_isolated_from_later_manifest_edits
+* test_unknown_lookups_return_null
+* test_manifest_catalog_registers_and_resolves
+10/10 passed.
+
+
+res://tests/unit/test_deep_clone.gd
+* test_rich_state_is_valid_and_round_trips_losslessly
+* test_v07_mutating_every_nested_container_leaves_source_unchanged
+* test_v07_no_shared_object_references
+* test_exported_primitives_contain_no_typed_containers
+* test_v12_settings_never_persist_debug_speed
+* test_gameplay_and_metadata_projections_are_disjoint_and_complete
+* test_strict_decoder_rejects_malformed_snapshots
+7/7 passed.
+
+
+res://tests/unit/test_identity.gd
+* test_entity_id_equality_uses_all_components
+* test_entity_id_round_trips_at_int64_bounds
+* test_malformed_entity_ids_are_rejected
+* test_command_id_round_trip_and_rejection
+* test_allocation_uses_state_namespace_and_increments
+* test_allocation_at_limit_fails_without_drift
+* test_new_namespace_keeps_existing_entity_ids
+7/7 passed.
+
+
+res://tests/unit/test_integer_math.gd
+* test_add_and_sub_limits
+* test_mul_limits_all_sign_cases
+* test_floor_and_ceil_div_with_negatives
+* test_mul_div_matches_oracle_including_overflowing_intermediates
+* test_small_remainder_product_exhaustive
+* test_mul_div_rejects_invalid_operands
+* test_basis_point_rounding_rules
+* test_growth_duration_cap_and_minimum
+* test_increasing_increment_recurrence
+9/9 passed.
+
+
+res://tests/unit/test_invalid_content.gd
+* test_null_manifest
+* test_empty_manifest_id
+* test_duplicate_crop_id
+* test_invalid_crop_id_format
+* test_nonpositive_duration
+* test_negative_value
+* test_basic_crop_with_seed_cost
+* test_unknown_crop_class
+* test_stage_reference_count
+* test_empty_stage_reference
+* test_level_gate_out_of_range
+* test_missing_research_reference
+* test_research_unlocking_another_crop
+* test_research_for_unknown_crop
+* test_research_nonpositive_duration
+* test_start_unlock_unknown_or_researched
+* test_crop_without_research_must_be_start_unlocked
+* test_curve_level_one_not_zero
+* test_curve_not_strictly_increasing
+* test_curve_continuation_invalid
+* test_missing_curve
+* test_skill_missing_prerequisite
+* test_skill_prerequisite_cycle
+* test_duplicate_skill
+24/24 passed.
+
+
+res://tests/unit/test_level_curve.gd
+* test_registry_is_valid
+* test_all_representable_thresholds_match_oracle
+* test_explicit_table_is_frs_section_5_1_unchanged
+* test_option_b_vectors_31_to_40
+* test_closed_form_adversary_does_not_match
+* test_below_at_above_every_explicit_threshold
+* test_below_at_above_30_to_35
+* test_lookup_at_representation_boundary
+8/8 passed.
+
+
+res://tests/unit/test_new_game_state.gd
+* test_new_game_is_valid
+* test_v01_plots_ids_and_unlocks
+* test_v01_player_baseline
+* test_v01_identity_and_counters
+* test_g3_budget_defaults_are_inert
+* test_v11_fixed_eight_column_coordinates
+* test_v11_hole_bearing_unlock_is_rejected
+* test_v11_contiguous_expansion_is_valid
+* test_unlock_count_below_24_is_rejected
+* test_locked_plot_cannot_hold_a_cycle
+* test_scattered_occupancy_is_valid
+11/11 passed.
+
+
+res://tests/unit/test_scheduler_ordering.gd
+* test_each_tuple_field_orders_independently
+* test_entity_order_is_numeric_not_uuid_lexical
+* test_pop_order_is_independent_of_push_permutation
+* test_pop_at_returns_all_events_at_one_time_in_order
+* test_duplicate_insertion_sequence_is_rejected
+* test_cancellation_and_bounded_storage
+* test_rebuild_reproduces_identical_keys_and_order
+* test_rebuild_skips_ready_cycles
+8/8 passed.
+
+
+res://tests/unit/test_smoke.gd
+* test_runner_executes_typed_test
+1/1 passed.
+
+
+res://tests/unit/test_state_validation.gd
+* test_level_must_match_xp
+* test_negative_wallet
+* test_points_must_be_conserved
+* test_unknown_skill_and_rank_range
+* test_skill_prerequisite_and_level_gate
+* test_av003_01_level7_auto_replant_profile_is_valid_on_its_manifest
+* test_state_bound_to_another_manifest_is_not_validated_with_this_registry
+* test_cycle_identity_collision_and_foreign_ids
+* test_cycle_timing_invariants
+* test_cycle_unknown_crop_and_plot_mismatch
+* test_duplicate_insertion_sequence
+* test_selected_crop_must_exist
+* test_schema_and_save_identity
+* test_replay_state_invariants
+* test_unknown_research_reference
+* test_settings_and_budget_ranges
+* test_anchor_intervals_are_bounded_and_1x_outside_active
+17/17 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts              12
+Tests               116
+Passing Tests       116
+Asserts            3021
+Time              0.845s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M01\test_runs\20261030T032909Z\junit.xml
+
+--- stderr ---
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ff)
+
+
