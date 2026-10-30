@@ -492,6 +492,15 @@ Default fallback offered for explicit acceptance: **plant selected crop without 
 
 **Approval record:** Approved by project owner on **2026-10-27**, confirmation **“Approve Group 3.”** Selected **Option A: exact Pareto-pruned Maximum Profit and Budget Protection rate objectives within the remaining same-mode/same-priority funding group; deterministic marginal-ROI Capital Efficiency, required/fixed/custom-priority commitments first, equal-priority MP→CE→BP, one shared cap and stable ties. No automatic approximation fallback; benchmarks remain future evidence.** **Source synchronization: complete for approved scope**; see the Group 3 inventory. Approval records planning policy, not implementation, integration results or measured performance.
 
+**M02 measured evidence — 2026-10-30:** Recorded with owner approval of the M02 documentation changes ("All C1–C9", 2026-10-30). The guarantee and the benchmark are separate claims.
+
+- **Guarantee (Option A, as approved):** Maximum Profit and Budget Protection return the exact optimum of the incremental net rate within the group's funds (and the ceiling C for Budget Protection), with the approved tie rules. `RateFrontier` uses identical-plot classes and an integer lower approximation with a certified error bound; every comparison inside that bound is decided in exact BigInt. Capital Efficiency follows ruling Q2 (per-cycle ROI with the approved tie chain) and makes no global-optimum claim. No negative-net option is ever chosen.
+- **Verification:** 66 frontier vectors and 45 Smart vectors from an independent Python `Fraction` oracle, a brute force for groups of 8 plots or fewer, and mutation checks in S0 and S5.
+- **Measured (headless, development machine, median of 7, cold):** uniform 32-plot Tomatoes MP 3.27 ms (B3 gate ≤ 5 ms, owner-amended: pass); mixed 8-crop MP 17.5 ms and the S0 worst case 40.3 ms (gate ≤ 50 ms: pass). Results are cached for identical solver inputs only (256 entries, never persisted).
+- **Scope:** no approximation and no fallback Option B was needed. Hardware qualification stays with DEC-023/M06.
+
+Evidence: [M02 handoff §3](../../artifacts/M02/M02_Handoff.md#3-solver-guarantee-and-measured-benchmark), [S0](../../artifacts/M02/evidence/S0/S0_Evidence.md) and [S5](../../artifacts/M02/evidence/S5/S5_Evidence.md) evidence.
+
 **Issue and why it matters:** Maximum Profit promises a batch objective while TRS permits a benchmark-justified approximation. There are up to four options for each of 32 plots; brute force across the whole farm is impractical, and a currency-indexed table can grow with an uncapped wallet. Profit-per-cycle alone is not incremental net profit/hour.
 
 **Requirements:** FRS §§6.2–6.3,7.2; TRS §§4.4,6,14; T-023/024. None is always a candidate; no zero-cost ROI division; negative incremental-profit automatic choices excluded.
@@ -800,6 +809,15 @@ Keep manual acceptance/claim/confirmed abandonment, three accepted/unclaimed slo
 **Original:** D-24. **Status:** Approved. **Importance:** High. **Type:** product/progression acceptance. **Earliest need:** before M02-T17 scenario design; human protocol before M05 completion, evidence in M06. **Affected:** M01–M06 data/scenarios, especially M02/M05/M06. **Depends on:** DEC-002/003/004/007/008/009/010/019; timing separation DEC-013/017.
 
 **Approval record:** Approved by project owner on **2026-10-27**, confirmation **“group 5 aapproved as recommended.”** Selected option A: full-cost automated economy scenarios plus actual normal-speed human automation/post-automation engagement playtests. Initial provisional foreground+meaningful-input-within-five-real-minutes indicator supplemented by diaries; reading/planning is not a click quota. Record real/simulated/offline/debug provenance, actual human sample/duration/limits and met/missed/insufficient evidence. Preserve original goals/uncapped offline/optional contracts; no automatic tuning or new features. **Source synchronization: complete for approved scope**, per the Group 5 inventory below. This is planning scope/policy approval, not implemented code, selected unnamed hardware/assets or empirical evidence.
+
+**M02 automated pacing evidence — 2026-10-30:** Recorded with owner approval of the M02 documentation changes ("All C1–C9", 2026-10-30). This is automated economics only; human engagement is **unobserved**, and nothing was tuned.
+
+- **Protocol:** full-cost scripted strategies from the untouched new-game state at normalized 1×: focused automation, mixed growth/profit, coin/XP, low reserve and high reserve, each active-only (input every simulated minute) and mixed-offline (20 minutes online, 40 minutes closed).
+- **Result against the 3–5 active-hour target:** focused automation **met** (3.65 h active-only). Mixed growth/profit **missed** (5.48 h), which FRS §12.1 allows for non-focused strategies. Mixed-offline runs reach automation in 2.0–3.0 active hours over 6–9 elapsed hours.
+- **Binding constraint:** the level 7 XP threshold, not coins; every run still held 5,169–13,626 coins at full automation.
+- **Still open:** the ~48 additional engaging active hours and the normal-speed human playtests remain with M05/M06.
+
+Evidence: [M02 handoff §4](../../artifacts/M02/M02_Handoff.md#4-pacing-report-v11-t17) and [S7 evidence](../../artifacts/M02/evidence/S7/S7_Evidence.md).
 
 **Issue and why it matters:** headless automatic production can measure earnings and unlock time, but cannot establish 48 additional hours of human engagement. FRS §15's “automated balancing evidence” wording must be interpreted alongside its explicit active-play target, not used to claim engagement from accelerated elapsed time.
 

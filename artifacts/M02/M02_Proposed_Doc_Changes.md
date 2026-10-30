@@ -1,6 +1,15 @@
 # M02 — Proposed changes to existing documentation (awaiting approval)
 
-Date: 2026-10-30 · Status: **proposed, none applied.** Each item needs a specific owner approval before any existing document is edited.
+Date: 2026-10-30 · Status: **all 9 items applied 2026-10-30.** Owner approval: "All C1–C9".
+
+Applied as dated, additive notes; no earlier approval text, task text, gameplay rule or provisional value was rewritten:
+
+- **M02 plan:** implementation status note (C4), the Q3 ruling at T10 (C1), the T07 "level gate" wording note (C2), and historical notes on the Group 1 sentence and the expected-deliverables line (C3).
+- **Roadmap:** M02 row, D-04/06–12/20/25 rows, an M02 completion section, and the new TRS SHA-256 in §1 (C5).
+- **Decision Register:** DEC-009 measured evidence (C6) and DEC-024 automated pacing evidence (C7). Index statuses are unchanged.
+- **TRS:** non-normative notes in §4.1 (M02 failure codes and precedence, C8) and §20.3 (manifest freeze, C9).
+
+New TRS SHA-256: `29B49763F59314972B72E13F2E100680B80A1A6450D73FD7CE01DD04F39953BD`. The FRS is unchanged (`2FDF6A93…A310`).
 
 Every item would be applied as a dated, additive note. None of them:
 
