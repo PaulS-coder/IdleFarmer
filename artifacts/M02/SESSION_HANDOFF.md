@@ -40,6 +40,27 @@ Read this first in a new chat. It is a pointer document; the authorities are the
 - **S6:** committed-harvest port (carry-over 1 from M01-T13).
 - **Q3:** seed protection and custom priorities are tested through fixtures only; their config commands return `FEATURE_UNAVAILABLE`.
 
+## Working method (what this project has actually used — keep it)
+
+- **Planning is finished.**
+  - `ce-brainstorm` was used once, to start M01; its decisions live in the findings and build-plan docs.
+  - Do **not** run `ce-brainstorm` or `ce-plan` again for M02. Reopen a decision only if a slice proves it wrong, and then ask the owner.
+- **Implementation is done directly, one slice at a time,** with owner approval before each next slice. Optionally run `/compound-engineering:ce-work` scoped to a single slice, but it must stop after that slice and must not push.
+- **Independent verification is the core of the method; never skip it:**
+  - Exact expected values come from the **independent Python oracle** (`tools/oracles/*`), never from the GDScript under test.
+  - Every slice runs **4–6 isolated mutation checks**. If a deliberate defect is not caught, add the missing test vector before committing (S0 and S1 both found such gaps).
+  - Every slice ends with a **clean-import run** and an evidence file recording what was proven, the mutation results, and any deviations.
+- **Subagents** (Agent tool, general-purpose) are for broad *read-only* reviews: readiness checks across many docs, or code-fit reviews. Verify any surprising claim they make against the files before relying on it.
+- **Before opening the M02 PR:**
+  1. Run `/compound-engineering:ce-code-review` on the branch diff.
+  2. Fix or record its findings.
+  3. Then use `/compound-engineering:ce-commit-push-pr`, with owner approval to push.
+- **Owner approvals** are needed for:
+  - each new slice;
+  - any change to approved decisions;
+  - any edit to existing spec documents (propose a change list first, as done at M01 close);
+  - pushing and merging.
+
 ## How to work (proven conventions)
 
 **Workflow per slice:**
