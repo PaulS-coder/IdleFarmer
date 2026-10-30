@@ -1,0 +1,6 @@
+# Godot import cache and editor state
+idle_farmer/.godot/
+*.tmp
+
+# Scratch test runs; curated evidence lives in artifacts/*/evidence/
+artifacts/*/test_runs/

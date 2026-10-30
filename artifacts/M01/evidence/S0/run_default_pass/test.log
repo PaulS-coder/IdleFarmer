@@ -1,0 +1,32 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_smoke.gd
+* test_runner_executes_typed_test
+1/1 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 1
+Passing Tests         1
+Asserts               1
+Time              0.471s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M01\test_runs\20261030T030001Z\junit.xml
+

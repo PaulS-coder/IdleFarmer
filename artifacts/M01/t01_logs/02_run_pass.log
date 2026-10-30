@@ -1,0 +1,31 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/T01Probe] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests_pass/test_trivial_pass.gd
+* test_trivial_pass
+1/1 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 1
+Passing Tests         1
+Asserts               1
+Time              0.466s
+
+
+---- All tests passed! ----
+
+Results saved to res://logs/junit_pass.xml

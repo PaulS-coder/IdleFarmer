@@ -2,6 +2,8 @@
 
 > **Audit corrections A1 — 2026-10-28:** Apply the approved contracts in [TRS §§15.1/20](../architecture/IdleFarmer_Technical_v1.5.md), [FRS audit requirements](../requirements/IdleFarmer_Functional_v1.0.md) and the [Audit Decision Register](../decisions/Audit_Decision_Register.md). The task crosswalk below is normative for the listed existing tasks; it does not add gameplay or implement later-stage features. [Correction changelog](../audit/round_01/Audit_Correction_Changelog.md) preserves before/after references. Existing provisional values and Open/Deferred evidence remain unchanged.
 
+> **M01 implementation status — 2026-10-30:** All tasks M01-T01–T16 are implemented on branch `m01-implementation`. M01-V01–V14 pass within the scope stated in the [M01 handoff](../../artifacts/M01/M01_Handoff.md); the final clean-import run had 210 tests and 6,354 assertions. Evidence per slice is under `artifacts/M01/evidence/`. Task text below is unchanged. Working decisions are in [M01_Readiness_Findings.md](M01_Readiness_Findings.md) (P1–P13, I1–I3) and [M01_Build_Plan.md](M01_Build_Plan.md). Graphics, durable persistence, a real platform clock and browser behavior are not claimed.
+
 Priority P0 · Planning only · Depends on toolchain/content decisions · Next: M02
 
 **Approved foundation update — 2026-10-26:** Apply [Group 1 in the Decision Register](../decisions/Decision_Register.md) and TRS clarification G1: DEC-005/006/013/016/026 are binding; DEC-001's standard Godot/Compatibility/GUT/SQLite-evaluation direction is approved, with actual artifact/fingerprint verification still open after C1 selects the names. Other decisions and gameplay values retain their existing proposed/provisional status. This document defines future work; approval is not implementation/test evidence.
@@ -37,7 +39,9 @@ All runtime records/services below extend `RefCounted` unless stated. Exported c
 | `core/content/crop_definition.gd`, `level_curve_definition.gd`, `content_registry.gd` | `CropDefinition`, `LevelCurveDefinition` resources; `ContentRegistry` validates and exposes immutable definitions |
 | `core/simulation/game_command.gd`, `command_result.gd`, `simulation_event.gd` | `GameCommand`, typed Plant/Harvest commands, `CommandResult`, `SimulationEvent`, failure enums |
 | `core/simulation/event_scheduler.gd`, `simulation_engine.gd`, `state_change_batch.gd` | `EventScheduler`, `SimulationEngine`, `StateChangeBatch`; sole mutation orchestration |
-| `core/economy/integer_math.gd`, `economy_system.gd`, `economic_transaction.gd` | `IntegerMath`, `EconomySystem`, immutable `EconomicTransaction` |
+| `core/economy/integer_math.gd`, `economy_system.gd`, `economic_transaction.gd` | `IntegerMath`, `EconomySystem`, immutable `EconomicTransaction` (as implemented, 2026-10-30: `IntegerMath`/`MathResult` live in the independent `core/math/`) |
+| `core/math/integer_math.gd`, `math_result.gd` *(added 2026-10-30)* | Checked int64 arithmetic with no dependency on other core modules |
+| `core/application/game_controller.gd`, `raw_intent.gd`, `commit_sink.gd` *(added 2026-10-30, ruling I2)* | In-memory `GameController`: due work before stamping, controller-issued command counters, intent de-duplication, clone-then-commit and the commit sink contract with COMMITTED/NOT_COMMITTED/UNKNOWN |
 | `core/time/time_provider.gd`, `simulation_clock.gd` | `TimeProvider` abstraction; `SimulationClock`; no scene dependencies |
 | `core/farming/farm_system.gd`, `core/progression/progression_system.gd` | Manual `FarmSystem`, cumulative-XP `ProgressionSystem` |
 | `data/crops/`, `data/levels/`, `tests/fixtures/` | Versioned source catalog, full curve and intentionally isolated fixtures |
@@ -100,6 +104,8 @@ Dependencies: T02–T04. Implement root/player/plot/cycle/time/settings and empt
 **Approved G4 constraints:** Include profile-owned versioned GameSettings in the typed root/clone inventory, excluding persisted debug speed. Reserve explicit contract offer/acceptance/claim eligibility and simulation-bucket/segment/session/state-time fields; ownership/windows and C2 exact contract content are approved; M01 reserves records only, while real contract behavior/evidence remains M05/M06. References: DEC-017/018/019/021; TRS §§3,9.4,10.
 
 **Approved C2 constraints:** Reserve typed ContractDefinition/instance snapshot fields for the approved C2 IDs/guards/goals/frozen rewards and acceptance ordering; this is a data/interface foundation, not M01 contract gameplay. Preserve lossless clone/serialization boundaries.
+
+**Applied ruling I3 — 2026-10-30:** Skill allocations are represented as data only in `PlayerState.skill_ranks` (TRS §9.4 `player.skill_ranks`), validated against the bound manifest's skill definitions (rank range, level gate, rank ≥ 1 prerequisite). This exists solely for AV-003 point-conservation and manifest-binding tests. Allocation, reset and skill effects remain M02.
 
 ### M01-T06 — Define typed commands, events and mutation batches
 
@@ -220,7 +226,7 @@ Run the pinned runner headlessly from a clean import; suites must fail the proce
 | M01-V11 | G2 baseline: 0 coins/XP/points, level 1, 24 Empty plots in 8×3, row-4 IDs 25–32 Locked. Map all 32 IDs to fixed eight-column coordinates and reject a hole-bearing unlock fixture. All 30 XP thresholds match FRS; source anchors remain unchanged; C1 option B continuation is defined explicitly, without changing these1–30 thresholds. |
 | M01-V12 | G4 typed settings/contracts/accounting fields deep-clone independently; debug speed not persisted. TimeProvider exposes active/suspended observations; headless/native-free audit produces required M03-T18 probe recipe without claiming executed browser evidence. |
 | M01-V13 | C1: exact option B increment/cumulative vectors31–40, per-step ceil versus rounded closed-form adversary, multi-level/surplus points and independent high-precision oracle. Largest representable threshold/valid max-XP lookup succeeds even when next threshold exceeds int64; no invented cap or naive intermediate overflow. Named toolchain/artifact manifest labels distinguish selected from verified. |
-| M01-V14 | Audit A1: Checkpoint receipt/attempt metadata is separate from gameplay allocation: extra time/settings commits must not change crop/event IDs; compare gameplay exactly and validate per-run durable metadata separately. AV-001-01/03/04; AV-002-01–05 with in-memory commit fakes; AV-003-01–04; AV-004-01/02/05. Freeze identity, manifest, prepared-result/sink and accepted-envelope contracts; no native repository or UI implementation is required. |
+| M01-V14 | Audit A1: Checkpoint receipt/attempt metadata is separate from gameplay allocation: extra time/settings commits must not change crop/event IDs; compare gameplay exactly and validate per-run durable metadata separately. AV-001-01/03/04; AV-002-01–05 with in-memory commit fakes; AV-003-01–04; AV-004-01/02/05. Freeze identity, manifest, prepared-result/sink and accepted-envelope contracts; no native repository or UI implementation is required. Scope ruling I1 (2026-10-30): see the note after the crosswalk below. |
 
 ## Acceptance criteria and definition of done
 
@@ -246,5 +252,14 @@ These are required constraints on existing tasks, with their original dependency
 | AUD-003 / AUD-DEC-003 B | T02/T03/T05/T12/T14; V05/V07/V13 | Bind state to immutable rules before lookup/validation; preserve derived level and point conservation. | AV-003-01–03; current option-B exactness; M01-V14 |
 | AUD-004 / AUD-DEC-004 B | T06/T13/T14; V03/V04/V10 | Define accepted stamp/order, immutable replay envelope and post-due rejection baseline. | AV-004-01/02/05 with fakes; M01-V14 |
 | AUD-008 / AUD-DEC-008 A | T05 L90 | Mark G4-only content reservation historical; C2 catalog is settled. | AV-008-01; M01-V14 |
+
+**Applied scope ruling I1 — 2026-10-30:** M01-V14's AV ranges are read through the crosswalk above:
+
+- **M01 executes:** AV-001-01/03/04, AV-002-01/02/05 and AV-003-01/02/03 (with in-memory commit fakes), plus AV-004-01/02/05.
+- **AV-002-03/04** (catch-up, settings, migration, startup, backup and shutdown receipts during UNKNOWN) and **AV-003-04** (schema migration with backup) are owned by M03.
+- **AV-004-03/04** (boost and reset quotes) are owned by M02.
+- **AV-001-02** (claimed-offer rollback) needs contracts and is owned by M05.
+
+This resolves the wording difference between the V14 row and the crosswalk without changing any AV criterion.
 
 **Additional exit condition:** complete the task-level A1 obligations above and M01-V14 at the stage owned by this milestone. Later-runtime cases may be specified with fakes now only where the staging explicitly permits it; they remain required for their real integration milestone. No new mandatory gameplay family, final balance value or earlier native/UI implementation follows from A1.

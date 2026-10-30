@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="1" >
+  <testsuite name="s0_probe/mixed/test_smoke.gd" tests="1" failures="0" skipped="0" time="0.004481" >
+      <testcase name="test_runner_executes_typed_test" assertions="1" status="pass" classname="s0_probe/mixed/test_smoke.gd" time="0.004481" >
+      </testcase>
+  </testsuite>
+</testsuites>
