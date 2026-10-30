@@ -56,6 +56,8 @@ This note changes no existing document.
 
 ## 4. Documentation inconsistencies (proposed corrections; not applied)
 
+**Applied 2026-10-30:** C1–C3 were applied as dated notes in the M02 plan with owner approval; see [M02_Proposed_Doc_Changes.md](../../artifacts/M02/M02_Proposed_Doc_Changes.md). C4 needed no change.
+
 | # | Issue | Proposed fix |
 |---|---|---|
 | C1 | Staging conflict over seed protection and custom priorities. | Record the Q3 ruling in the M02 plan. |

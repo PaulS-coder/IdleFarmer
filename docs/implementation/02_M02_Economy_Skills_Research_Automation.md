@@ -2,9 +2,11 @@
 
 > **Audit corrections A1 — 2026-10-28:** Apply the approved contracts in [TRS §§15.1/20](../architecture/IdleFarmer_Technical_v1.5.md), [FRS audit requirements](../requirements/IdleFarmer_Functional_v1.0.md) and the [Audit Decision Register](../decisions/Audit_Decision_Register.md). The task crosswalk below is normative for the listed existing tasks; it does not add gameplay or implement later-stage features. [Correction changelog](../audit/round_01/Audit_Correction_Changelog.md) preserves before/after references. Existing provisional values and Open/Deferred evidence remain unchanged.
 
+> **M02 implementation status — 2026-10-30:** All tasks M02-T01–T18 are implemented and merged to `main` (PR 3, merge `214cc7f`). M02-V01–V15 pass within the scope stated in the [M02 handoff](../../artifacts/M02/M02_Handoff.md); the final clean-import run had 370 tests. V11 is reported, not tuned: the focused-automation strategy reaches full basic automation in 3.65 active hours (target met); mixed growth/profit takes 5.48 h (missed, which FRS §12.1 allows). Evidence per slice is under `artifacts/M02/evidence/`. Task text below is unchanged. Working decisions are in [M02_Readiness_Findings.md](M02_Readiness_Findings.md) and [M02_Build_Plan.md](M02_Build_Plan.md) (Q1–Q3, E1–E18, B1–B6). Nothing is persisted, there is no UI, and human engagement is unobserved (DEC-024).
+
 Priority P0 · Planning only · Depends on M01 · Next: M03
 
-**Approved foundation update — 2026-10-26:** [Decision Register Group 1](../decisions/Decision_Register.md) / TRS G1 fixes arithmetic, event/command order, interval accounting, bounded replay and numeric-limit recovery. DEC-001's toolchain direction is approved; C1 selects version names; actual artifact/fingerprint verification remains open. Skill, acceleration, budget, optimizer and automation-lifecycle decisions are not approved by Group 1.
+**Approved foundation update — 2026-10-26:** [Decision Register Group 1](../decisions/Decision_Register.md) / TRS G1 fixes arithmetic, event/command order, interval accounting, bounded replay and numeric-limit recovery. DEC-001's toolchain direction is approved; C1 selects version names; actual artifact/fingerprint verification remains open. Skill, acceleration, budget, optimizer and automation-lifecycle decisions are not approved by Group 1. *(Historical note, 2026-10-30: this sentence describes Group 1 only. Those decisions were approved by G2/G3; see the G2 and G3 updates below.)*
 
 **Approved G2 update — 2026-10-27:** Apply [Decision Register Group 2](../decisions/Decision_Register.md) and TRS clarification G2: DEC-003 zero/Empty start, DEC-004 one-point/minimum-rank skill rules, and amended DEC-020 fixed eight-column 8×3 start with strict fourth-row 25→32 unlocking. DEC-002's through-30 table is approved provisional development data; G2 did not select continuation; C1 now approves increasing option B below. G1 contracts remain binding; no game implementation or test execution is claimed.
 
@@ -117,6 +119,8 @@ Dependencies: T02,T04. Add versioned ranks/costs/effects and PurchaseUpgrade gua
 
 Dependencies: T01,T04. Define the 14 source projects with existing provisional costs/durations and level+research gates. Permit one active manually started project and one optional manually confirmed boost: snapshot actual start cost C/original timing, charge ceil(C/2), set remaining_us to ceil(remaining_us/2), mark boost_used. Reject used/completed/no-time-saved/unaffordable requests without charge, reschedule safely and preserve flag/snapshot through save. No auto next project/crop/boost. Deliver exact quote/execution and duplicate/event-boundary tests. References: FRS §8; TRS §§3.5,5,6; DEC-007/G3.
 
+**Applied wording note — 2026-10-30:** read "level+research gates" above as **"level gate"**. Research projects have no research prerequisites (DVS-033); each project is gated by player level only.
+
 **Approved G1 constraints:** Put ResearchCompleted before the due maturity/automatic-harvest batch at that timestamp per TRS §4.2. No automatic project start/crop assignment follows completion. The one-slot/one-boost ceil(C/2)-cost and ceil(remaining/2)-time policy is now approved under DEC-007/G3.
 
 ### M02-T08 — Implement authorized batch manual actions
@@ -140,6 +144,8 @@ Dependencies: T04,T07,T08. Add configuration commands and skill checks. Mature c
 **Applied A1 task constraints:** AUD-DEC-004 B, AUD-DEC-007 B. Follow the exact per-issue task/test crosswalk in this plan’s “Audit A1 task and validation corrections” section and TRS §§15.1/20. M02-V15 extends this task’s acceptance evidence; no runtime pass is implied.
 
 Dependencies: T01,T09. Resolve crop/auto/fertilizer/accepted-fallback/eligible-priority fields Plot > Group > Farm with explicit unset semantics. Keep R/percentage/seed-toggle exclusively in FarmBudgetConfiguration; reject per-group/plot override attempts. Gate basic controls/three Smart modes at owned Smart skill level 9; advanced priorities/seed toggle at owned level-15 node. Defaults: R=0, p=25%, seed toggle Off, equal priorities with stable ID ties. Preserve inactive config without silently activating unavailable abilities. Advanced executable features arrive M05. References: FRS §§5.4,7; TRS §6; DEC-010/011/012/G3.
+
+**Applied ruling Q3 — 2026-10-30:** seed protection and custom priorities are staged as follows. M02 implements and tests their allocator logic and level-15 gates using fixtures. Their configuration commands return `FEATURE_UNAVAILABLE` until M05. All plots have equal priority in M02 gameplay.
 
 ### M02-T11 — Implement seed-first shared-wallet allocator
 
@@ -258,7 +264,7 @@ Use M01 headless runner, deterministic fixtures and state digests. Unit-test rul
 
 ## Expected deliverables
 
-Future outputs: typed economy/skills/research/automation services and commands; versioned content/skill graph; exact oracle and production optimizer; coherent batch/retry tests; economic transaction schema; progression scenario reports; D-04/06–12/20/25 decisions; M03 persistence handoff and M05 advanced-feature backlog. Current output is this plan only.
+Future outputs: typed economy/skills/research/automation services and commands; versioned content/skill graph; exact oracle and production optimizer; coherent batch/retry tests; economic transaction schema; progression scenario reports; D-04/06–12/20/25 decisions; M03 persistence handoff and M05 advanced-feature backlog. Current output is this plan only. *(Historical note, 2026-10-30: the D-04/06–12/20/25 decisions were approved by G2/G3, not produced by M02; the delivered outputs are listed in the [M02 handoff](../../artifacts/M02/M02_Handoff.md).)*
 
 ## Audit A1 task and validation corrections
 

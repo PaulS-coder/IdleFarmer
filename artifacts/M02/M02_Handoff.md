@@ -211,4 +211,4 @@ The complete field inventory is [M03_Field_Inventory.md](M03_Field_Inventory.md)
 | UI for quotes, budgets, loops, stall reasons, research boost preview | M04 |
 | §6 backlog, contracts, statistics, final balance review of §4 | M05 |
 | Human engagement evidence (DEC-024), hardware qualification (DEC-023), performance acceptance | M06 |
-| Documentation changes, including C1–C3 | Owner approval: [M02_Proposed_Doc_Changes.md](M02_Proposed_Doc_Changes.md) |
+| Documentation changes, including C1–C3 | **Applied 2026-10-30** with owner approval: see [M02_Proposed_Doc_Changes.md](M02_Proposed_Doc_Changes.md) |

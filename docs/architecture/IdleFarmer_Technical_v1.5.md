@@ -211,6 +211,14 @@ Commands return structured `CommandResult` with `success`, failure code, affecte
 
 This lists the implemented set (M01 build plan P11) so later commands stay consistent; it adds no gameplay rule.
 
+**M02 implementation note — 2026-10-30 (non-normative):**
+
+- **Failure codes added in M02:** `FEATURE_UNAVAILABLE`, `UNKNOWN_FERTILIZER`, `UNKNOWN_SKILL`, `UNKNOWN_UPGRADE`, `UNKNOWN_RESEARCH`, `PLOTS_FULL`, `SKILL_MAX_RANK`, `UPGRADE_MAX_RANK`, `UPGRADE_PREDECESSOR_REQUIRED`, `RESEARCH_ACTIVE`, `RESEARCH_DONE`, `NO_ACTIVE_RESEARCH`, `BOOST_USED`, `NO_TIME_SAVED`, `NOTHING_TO_RESET`, `SKILL_PREREQUISITE_REQUIRED` and `INSUFFICIENT_POINTS`. `INVALID_CONFIGURATION` and `SKILL_NOT_UNLOCKED` are now in use.
+- **Check precedence (the first failure is reported):** envelope and replay (`MALFORMED_ENVELOPE` → `INVALID_COMMAND_TIME` → `STALE_COMMAND` → `DUPLICATE_COMMAND` → `PERSISTENCE_UNAVAILABLE`) → `FEATURE_UNAVAILABLE` → unknown targets (`UNKNOWN_PLOT` / `UNKNOWN_CROP` / `UNKNOWN_FERTILIZER` / `UNKNOWN_SKILL` / `UNKNOWN_UPGRADE` / `UNKNOWN_RESEARCH`) → target state (plot, cycle, rank, research and reset states, `INVALID_CONFIGURATION`) → gates (`LEVEL_REQUIRED` / `RESEARCH_REQUIRED` / `SKILL_PREREQUISITE_REQUIRED` / `SKILL_NOT_UNLOCKED` / `INSUFFICIENT_POINTS`) → `STALE_TERMS` → `INSUFFICIENT_COINS` → `NUMERIC_LIMIT`. The full ordered list is `FailureCode.PRECEDENCE` in `core/simulation/failure_code.gd`.
+- **Batch commands** check the skill capability for the whole envelope before any per-member check, then report a typed outcome per member (DEC-025).
+
+This records the implemented set (M02 build plan §3.3); it adds no gameplay rule.
+
 **Rule:** Scheduled events due at the command's simulation timestamp are processed **before** an input command at that timestamp. Rejected commands produce no authoritative partial changes. Idempotency keys prevent duplicate economic effects if the same command is retried.
 
 **Approved manual batch contract (DEC-025):** prevalidate the command envelope/capabilities, then report typed per-plot outcomes. Ineligible members are skipped without partial manual charge/state mutation; authorized eligible members execute in stable order and their accepted subset commits as one coherent outcome. Each accepted planting remains all-or-nothing. All successful BatchHarvest credits precede that command's replant costs. A wholly rejected/all-invalid command changes no gameplay state measured after independently due work. A definitely NOT_COMMITTED candidate is not published. UNKNOWN is not rejection/rollback: stop and reconcile under §20.2; never overwrite a possibly committed primary from stale memory. Partial selection is not partial persistence or permission to bypass a Locked plot.
@@ -944,6 +952,8 @@ Approval: AUD-DEC-003 B; functional counterpart FR-AUD-003; exact criteria AV-00
 Use B. Resolve each save to its immutable supported progression/content manifest before validation, catch-up, quotes or input. Keep level as the highest threshold reached under that manifest and earned points as level−1, partitioned into unspent plus allocated one-point ranks/nodes. Unsupported references produce a recoverable no-overwrite error. Incompatible progression migration requires a separate approved mapping; absent that mapping, the profile remains on its supported old manifest.
 
 **Implementation contract.** This is not a balance change and does not force permanent support for arbitrary formats. Record the set of supported manifest versions in each build. Retain all definitions needed to interpret a supported profile’s curve and allocations; keep its quotes, UI, offline run, forecast and save validation on the same context. Pure schema migrations preserve the manifest binding. Economic data retuning outside progression also remains versioned and separately approved; existing planted/research/contract snapshots remain immutable. No extra awarded-level watermark is required under the unchanged pinned-curve invariant. Test changed-curve examples as separate manifests, not by silently editing the current approved one.
+
+**M02 implementation note — 2026-10-30 (non-normative):** `content_m02_v1` was frozen at M02-T18. Both supported manifests (`content_m01_v1` and `content_m02_v1`) are pinned by a canonical content digest in `tests/unit/test_manifest_freeze.gd`, so an in-place edit to either fails the test suite. A content change therefore needs a new manifest version.
 
 ### 20.4 AUD-R-004 — Accepted input and semantic confirmations
 
