@@ -35,6 +35,22 @@ static func arm(state: GameState, plot_id: int) -> void:
 	state.automation.plot(plot_id).authorization.arm(SettingsResolver.effective_plan_digest(state, plot_id), 0)
 
 
+## Reserved group record (fixture: group commands are M05). Returns its key; `plot_ids` join it.
+static func add_group(state: GameState, name: String, plot_ids: Array = []) -> String:
+	var group: GroupRecord = GroupRecord.new()
+	group.group_id = state.allocate_entity_id()
+	group.name = name
+	state.automation.groups[group.key()] = group
+	for plot_id: int in plot_ids:
+		state.automation.plot(plot_id).group_id = group.key()
+	return group.key()
+
+
+## Settings of the group with `key`.
+static func group_settings(state: GameState, key: String) -> FarmingSettings:
+	return state.automation.groups[key].settings
+
+
 ## A configured, armed automatic plot (fixture).
 static func loop_plot(state: GameState, plot_id: int, crop_id: String, policy: String = FertilizerDefinition.NONE_ID,
 		fallback: bool = false) -> void:

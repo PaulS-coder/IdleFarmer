@@ -18,7 +18,7 @@ static func effective(state: GameState, plot_id: int) -> FarmingSettings:
 	if record != null:
 		layers.append(record.settings)
 		if automation.groups.has(record.group_id):
-			layers.append(automation.groups[record.group_id])
+			layers.append(automation.groups[record.group_id].settings)
 	layers.append(automation.defaults)
 	for field: String in FarmingSettings.FIELDS:
 		for layer: FarmingSettings in layers:

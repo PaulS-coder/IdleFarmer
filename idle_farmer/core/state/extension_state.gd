@@ -29,28 +29,47 @@ class Upgrades:
 		return record if reader.ok() else null
 
 
-## Contract offers/instances/claims (DEC-019/C2; behavior is M05). Instances are primitive records.
+## Contract instances and one-time claimed offers (DEC-019/C2; behavior is M05). Typed reserved
+## records (M02-T16) so M03 persists a validated schema, not free-form dictionaries.
 class Contracts:
 	extends RefCounted
 
-	var instances: Array[Dictionary] = []
+	var instances: Array[ContractInstance] = []
 	var claimed_offer_ids: PackedStringArray = PackedStringArray()
 
 	func validate() -> PackedStringArray:
-		return PackedStringArray()
+		var errors: PackedStringArray = PackedStringArray()
+		var seen: Dictionary[String, bool] = {}
+		for instance: ContractInstance in instances:
+			errors.append_array(instance.validate())
+			if instance.instance_id != null:
+				if seen.has(instance.instance_id.key()):
+					errors.append("CONTRACT_INSTANCE_DUPLICATE: %s" % instance.instance_id.key())
+				seen[instance.instance_id.key()] = true
+			if instance.status == ContractInstance.STATUS_CLAIMED and not claimed_offer_ids.has(instance.offer_id):
+				errors.append("CONTRACT_CLAIM_UNRECORDED: offer '%s' claimed but not in claimed_offer_ids" % instance.offer_id)
+		var sorted: PackedStringArray = claimed_offer_ids.duplicate()
+		sorted.sort()
+		if sorted != claimed_offer_ids:
+			errors.append("CONTRACT_CLAIMED_UNSORTED: claimed offer IDs must be sorted")
+		return errors
 
 	func to_primitive() -> Dictionary:
-		return {"instances": PrimitiveReader.plain(instances), "claimed_offer_ids": Array(claimed_offer_ids)}
+		var items: Array = []
+		for instance: ContractInstance in instances:
+			items.append(instance.to_primitive())
+		return {"instances": items, "claimed_offer_ids": Array(claimed_offer_ids)}
 
 	static func from_primitive(value: Variant) -> Contracts:
 		var reader: PrimitiveReader = PrimitiveReader.new(value, "Contracts")
 		reader.expect_only(PackedStringArray(["instances", "claimed_offer_ids"]))
 		var record: Contracts = Contracts.new()
 		for item: Variant in reader.array_field("instances"):
-			if typeof(item) != TYPE_DICTIONARY:
-				reader.absorb(PackedStringArray(["Contracts: instance must be a dictionary"]))
+			var instance: ContractInstance = ContractInstance.from_primitive(item)
+			if instance == null:
+				reader.absorb(PackedStringArray(["Contracts: malformed instance"]))
 				continue
-			record.instances.append((item as Dictionary).duplicate(true))
+			record.instances.append(instance)
 		record.claimed_offer_ids = reader.string_array_field("claimed_offer_ids")
 		return record if reader.ok() else null
 

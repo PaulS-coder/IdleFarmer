@@ -3,6 +3,8 @@ extends RefCounted
 ## Immutable record of one coin/XP movement (TRS §3.5). Fields are private and set once.
 ## `cycle_id` is null for movements not tied to a crop cycle (research, upgrades, plots, reset —
 ## M02). `origin` records whether the player, automation or the system caused it (M02 E13).
+## Each type belongs to exactly one accounting category (TRS §10, M02-T16); decoding rejects a
+## mismatched category, a wrong-signed coin delta or a cycle reference on a non-cycle type.
 
 const TYPE_SEED_PURCHASE: String = "seed_purchase"
 const TYPE_HARVEST_CREDIT: String = "harvest_credit"
@@ -20,6 +22,22 @@ const CATEGORY_EXPANSION: String = "expansion"
 const CATEGORY_EQUIPMENT: String = "equipment"
 const CATEGORY_RESET: String = "reset"
 const CATEGORY_RESEARCH: String = "research"
+## Reserved for M05 contract claims: a separate cash-flow/XP category, never harvest gross (C2).
+const TYPE_CONTRACT_CLAIM: String = "contract_claim"
+const CATEGORY_CONTRACTS: String = "contracts"
+
+## type → [category, coin-delta sign (+1 credit, −1 debit), tied to a crop cycle].
+const TYPE_RULES: Dictionary = {
+	TYPE_SEED_PURCHASE: [CATEGORY_SEEDS, -1, true],
+	TYPE_FERTILIZER_PURCHASE: [CATEGORY_FERTILIZER, -1, true],
+	TYPE_HARVEST_CREDIT: [CATEGORY_HARVEST, 1, true],
+	TYPE_PLOT_PURCHASE: [CATEGORY_EXPANSION, -1, false],
+	TYPE_UPGRADE_PURCHASE: [CATEGORY_EQUIPMENT, -1, false],
+	TYPE_SKILL_RESET: [CATEGORY_RESET, -1, false],
+	TYPE_RESEARCH_PURCHASE: [CATEGORY_RESEARCH, -1, false],
+	TYPE_RESEARCH_BOOST: [CATEGORY_RESEARCH, -1, false],
+	TYPE_CONTRACT_CLAIM: [CATEGORY_CONTRACTS, 1, false],
+}
 
 const ORIGIN_MANUAL: String = "manual"
 const ORIGIN_AUTOMATIC: String = "automatic"
@@ -107,6 +125,16 @@ func to_primitive() -> Dictionary:
 	}
 
 
+## True when the type is known, its category is the type's category, the coin delta has the
+## type's sign (zero allowed) and a cycle is referenced exactly when the type is cycle-bound.
+func is_consistent() -> bool:
+	if not TYPE_RULES.has(_type):
+		return false
+	var rule: Array = TYPE_RULES[_type]
+	return _category == rule[0] and _coin_delta * rule[1] >= 0 and (_cycle_id != null) == rule[2] and _xp_delta >= 0 \
+		and ORIGINS.has(_origin)
+
+
 static func from_primitive(value: Variant) -> EconomicTransaction:
 	var reader: PrimitiveReader = PrimitiveReader.new(value, "EconomicTransaction")
 	reader.expect_only(PackedStringArray(["transaction_id", "time_us", "type", "plot_id", "cycle_id", "coin_delta",
@@ -118,6 +146,6 @@ static func from_primitive(value: Variant) -> EconomicTransaction:
 	var tx: EconomicTransaction = EconomicTransaction.new(id, reader.int_field("time_us"), reader.string_field("type"),
 		reader.int_field("plot_id"), cycle, reader.int_field("coin_delta"), reader.int_field("xp_delta"),
 		reader.string_field("category"), reader.string_field("content_version"), origin_value)
-	if not reader.ok() or id == null or (cycle_value != null and cycle == null) or not ORIGINS.has(origin_value):
+	if not reader.ok() or id == null or (cycle_value != null and cycle == null) or not tx.is_consistent():
 		return null
 	return tx

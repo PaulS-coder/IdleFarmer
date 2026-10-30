@@ -256,7 +256,8 @@ static func harvest_ready_cycle(state: GameState, registry: ContentRegistry, plo
 	batch.transactions.append(EconomicTransaction.new(tx_id, now, EconomicTransaction.TYPE_HARVEST_CREDIT, plot_id,
 		cycle.cycle_id, reward[0], reward[1], EconomicTransaction.CATEGORY_HARVEST, cycle.content_version, origin))
 	batch.events.append(SimulationEvent.new(SimulationEvent.CROP_HARVESTED, now, plot_id, cycle.cycle_id,
-		{"crop_id": cycle.crop_id, "coins": reward[0], "xp": reward[1], "origin": origin}))
+		{"crop_id": cycle.crop_id, "coins": reward[0], "xp": reward[1], "origin": origin, "seed_cost": cycle.seed_cost_paid,
+			"fertilizer_id": cycle.fertilizer_id, "fertilizer_cost": cycle.fertilizer_cost_paid}))
 	if grant.levels_gained() > 0:
 		batch.events.append(SimulationEvent.new(SimulationEvent.LEVEL_GAINED, now, plot_id, null,
 			{"from_level": grant.old_level, "to_level": grant.new_level, "points_granted": grant.levels_gained()}))

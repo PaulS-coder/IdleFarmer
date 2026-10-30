@@ -208,8 +208,19 @@ func _validate_settings_content(registry: ContentRegistry) -> PackedStringArray:
 	var records: Dictionary = {"farm": automation.defaults}
 	for i: int in automation.plots.size():
 		records["plot %d" % (i + 1)] = automation.plots[i].settings
-	for group_id: String in automation.groups:
-		records["group '%s'" % group_id] = automation.groups[group_id]
+	for key: String in automation.groups:
+		records["group '%s'" % key] = automation.groups[key].settings
+		var group_id: EntityId = automation.groups[key].group_id
+		if group_id != null and (group_id.save_id != save_id or group_id.counter >= next_entity_id):
+			errors.append("GROUP_ID_FOREIGN: %s not allocated by this save" % key)
+	for record: PlotAutomation in automation.plots:
+		for crop_id: String in record.rotation.entries:
+			if not registry.has_crop(crop_id):
+				errors.append("ROTATION_CROP_UNKNOWN: plot %d '%s'" % [record.plot_id, crop_id])
+	for instance: ContractInstance in contracts.instances:
+		for id: EntityId in [instance.instance_id, instance.claim_id]:
+			if id != null and (id.save_id != save_id or id.counter >= next_entity_id):
+				errors.append("CONTRACT_ID_FOREIGN: %s not allocated by this save" % id.key())
 	for context: String in records:
 		var settings: FarmingSettings = records[context]
 		if settings.is_set(FarmingSettings.CROP_ID) and not settings.crop_id.is_empty() and not registry.has_crop(settings.crop_id):

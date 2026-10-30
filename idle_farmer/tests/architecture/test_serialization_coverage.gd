@@ -39,8 +39,22 @@ func _records() -> Array[Object]:
 		state.upgrades, state.research, state.contracts, state.automation, state.statistics,
 		CommandId.new("s", "e", 1), result, SimulationEvent.new(SimulationEvent.CROP_PLANTED, 0, 1, null),
 		state.automation.plot(1), state.automation.plot(1).settings, state.automation.plot(1).authorization,
-		state.automation.defaults,
+		state.automation.defaults, state.automation.plot(1).rotation, _group(state), _contract(state),
 	]
+
+
+func _group(state: GameState) -> GroupRecord:
+	var group: GroupRecord = GroupRecord.new()
+	group.group_id = state.allocate_entity_id()
+	group.name = "g"
+	return group
+
+
+func _contract(state: GameState) -> ContractInstance:
+	var contract: ContractInstance = ContractInstance.new()
+	contract.instance_id = state.allocate_entity_id()
+	contract.offer_id = "Q01"
+	return contract
 
 
 func test_every_record_field_is_serialized() -> void:

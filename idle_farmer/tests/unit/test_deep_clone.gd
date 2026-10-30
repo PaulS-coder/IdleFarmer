@@ -23,11 +23,16 @@ func _rich_state() -> GameState:
 	s.automation.plot(9).authorization.arm("digest-9", 3)
 	s.plot(10).stall_reason = PlotState.STALL_SEED_FUNDS
 	s.upgrades.ranks = {"irrigation": 1}
-	s.contracts.instances = [{"offer_id": "Q01", "progress": {"wheat": 3}}]
+	var contract: ContractInstance = ContractInstance.new()
+	contract.instance_id = s.allocate_entity_id()
+	contract.offer_id = "Q01"
+	contract.objective = {"kind": "quantity", "targets": {"wheat": 20}}
+	contract.progress = {"wheat": 3}
+	s.contracts.instances = [contract]
 	s.contracts.claimed_offer_ids = PackedStringArray(["Q00"])
 	s.automation.defaults.set_value(FarmingSettings.CROP_ID, "wheat")
-	s.automation.groups = {"g1": FarmingSettings.new()}
-	s.automation.rotation = {"nested": {"list": [1, 2, 3]}}
+	AutomationFixtures.add_group(s, "Field A", [11])
+	s.automation.plot(12).rotation.entries = PackedStringArray(["wheat", "corn"])
 	s.statistics.buckets = [{"start_us": 0, "coins": 16}]
 	s.statistics.segments = [{"kind": "active", "real_us": 10}]
 	s.statistics.lifetime = {"harvests": 2}
@@ -65,11 +70,13 @@ func test_v07_mutating_every_nested_container_leaves_source_unchanged() -> void:
 		func(c: GameState) -> void: c.plots.pop_back(),
 		func(c: GameState) -> void: c.research.completed.append("unlock_tomatoes"),
 		func(c: GameState) -> void: c.upgrades.ranks["irrigation"] = 2,
-		func(c: GameState) -> void: c.contracts.instances[0]["progress"]["wheat"] = 4,
+		func(c: GameState) -> void: c.contracts.instances[0].progress["wheat"] = 4,
+		func(c: GameState) -> void: c.contracts.instances[0].objective["targets"]["wheat"] = 30,
 		func(c: GameState) -> void: c.contracts.claimed_offer_ids.append("Q09"),
 		func(c: GameState) -> void: c.automation.defaults.auto_harvest = true,
-		func(c: GameState) -> void: c.automation.groups["g1"].set_value(FarmingSettings.AUTO_REPLANT, true),
-		func(c: GameState) -> void: c.automation.rotation["nested"]["list"].append(4),
+		func(c: GameState) -> void: c.automation.groups.values()[0].settings.set_value(FarmingSettings.AUTO_REPLANT, true),
+		func(c: GameState) -> void: c.automation.groups.values()[0].name = "Renamed",
+		func(c: GameState) -> void: c.automation.plots[11].rotation.entries.append("carrots"),
 		func(c: GameState) -> void: c.statistics.buckets[0]["coins"] = 0,
 		func(c: GameState) -> void: c.statistics.segments.clear(),
 		func(c: GameState) -> void: c.statistics.lifetime["harvests"] = 5,

@@ -246,16 +246,15 @@ func test_loop_runs_only_for_the_authorized_plan_digest() -> void:
 	AutomationFixtures.level7_automation(state)
 	Fixtures.unlock_crop(state, "carrots")
 	AutomationFixtures.level7_automation(state)
-	state.automation.groups["g1"] = FarmingSettings.new()
-	state.automation.plot(1).group_id = "g1"
+	var g1: String = AutomationFixtures.add_group(state, "Field A", [1])
 	AutomationFixtures.configure_plot(state, 1, "wheat", true, true)
 	state.automation.plot(1).settings.clear(FarmingSettings.CROP_ID)
-	state.automation.groups["g1"].set_value(FarmingSettings.CROP_ID, "wheat")
+	AutomationFixtures.group_settings(state, g1).set_value(FarmingSettings.CROP_ID, "wheat")
 	AutomationFixtures.arm(state, 1)
 	AutomationFixtures.ready_cycle(state, 1, "wheat")
 	# The inherited plan changes without any plot command (a group edit path, M05): the armed digest
 	# no longer matches, so the loop must not buy the new plan.
-	state.automation.groups["g1"].set_value(FarmingSettings.CROP_ID, "carrots")
+	AutomationFixtures.group_settings(state, g1).set_value(FarmingSettings.CROP_ID, "carrots")
 	assert_true(state.automation.plot(1).authorization.armed)
 	var proposal: BatchProposal = BatchPlanner.plan(state, registry, {"auto_harvest": true})
 	assert_eq(proposal.harvests.size(), 1)
@@ -264,10 +263,9 @@ func test_loop_runs_only_for_the_authorized_plan_digest() -> void:
 
 
 func test_resolution_plot_group_farm() -> void:
-	state.automation.groups["g1"] = FarmingSettings.new()
-	state.automation.groups["g1"].set_value(FarmingSettings.CROP_ID, "carrots")
-	state.automation.groups["g1"].set_value(FarmingSettings.AUTO_HARVEST, true)
-	state.automation.plot(2).group_id = "g1"
+	var g1: String = AutomationFixtures.add_group(state, "Field A", [2])
+	AutomationFixtures.group_settings(state, g1).set_value(FarmingSettings.CROP_ID, "carrots")
+	AutomationFixtures.group_settings(state, g1).set_value(FarmingSettings.AUTO_HARVEST, true)
 	state.automation.plot(2).settings.set_value(FarmingSettings.AUTO_HARVEST, false)
 	state.automation.defaults.set_value(FarmingSettings.CROP_ID, "wheat")
 	assert_eq(state.validate(registry), PackedStringArray())

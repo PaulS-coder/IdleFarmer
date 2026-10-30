@@ -32,6 +32,7 @@ var _accepted_log: Array[Dictionary] = []
 ## Set while a commit outcome is UNKNOWN: {"prepared", "events", "intent_id", "result", "command"}.
 var _pending: Dictionary = {}
 var _listeners: Array[Callable] = []
+var _harvest_observers: Array[Callable] = []
 
 
 func _init(catalog: ManifestCatalog, sink: CommitSink) -> void:
@@ -94,6 +95,14 @@ func accepted_log() -> Array[Dictionary]:
 
 func add_commit_listener(listener: Callable) -> void:
 	_listeners.append(listener)
+
+
+## Committed-harvest port (M02-T16, build plan §3.9): `observer` receives one immutable
+## CommittedHarvest per harvest, only after its batch is durably COMMITTED (never for a
+## NOT_COMMITTED candidate; an UNKNOWN commit publishes after reconcile confirms it). Observers get
+## records, never state, so they cannot create a second authoritative mutation.
+func add_committed_harvest_observer(observer: Callable) -> void:
+	_harvest_observers.append(observer)
 
 
 func set_speed_multiplier(speed: int) -> bool:
@@ -323,9 +332,19 @@ func _on_committed(events: Array[SimulationEvent], intent_id: String, result: Co
 	if result != null:
 		result.commit_status = CommitSink.COMMITTED
 		_remember_intent(intent_id, result)
+	# Harvest records are built before any listener runs, so a listener cannot alter them.
+	var harvests: Array[CommittedHarvest] = []
+	if not _harvest_observers.is_empty():
+		for event: SimulationEvent in events:
+			var harvest: CommittedHarvest = CommittedHarvest.from_event(event, _committed.state_sequence, harvests.size())
+			if harvest != null:
+				harvests.append(harvest)
 	if not events.is_empty():
 		for listener: Callable in _listeners:
 			listener.call(events.duplicate())
+	for harvest: CommittedHarvest in harvests:
+		for observer: Callable in _harvest_observers:
+			observer.call(harvest)
 
 
 func _remember_intent(intent_id: String, result: CommandResult) -> void:
