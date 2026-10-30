@@ -1,8 +1,8 @@
 class_name ContentM02V1
 extends RefCounted
 ## Builds manifest `content_m02_v1` (M02 build plan E1): every content_m01_v1 row unchanged, plus
-## skill effects, equipment, fertilizers, expansion bands and economy parameters. Draft until
-## M02-T18 freezes it; after that it is never edited in place (TRS §20.3).
+## skill effects, equipment, fertilizers, expansion bands and economy parameters. Frozen at M02-T18:
+## never edit it in place (TRS §20.3); `tests/unit/test_manifest_freeze.gd` pins its digest.
 
 const MANIFEST_ID: String = "content_m02_v1"
 
