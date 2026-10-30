@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="58" >
+  <testsuite name="tests/unit/test_canonical_codec.gd" tests="6" failures="0" skipped="0" time="0.032871" >
+      <testcase name="test_encoding_and_digest_match_independent_oracle" assertions="30" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.00571" >
+      </testcase>
+      <testcase name="test_round_trip_is_lossless_at_int64_bounds" assertions="33" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004951" >
+      </testcase>
+      <testcase name="test_key_insertion_order_does_not_change_digest" assertions="1" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004677" >
+      </testcase>
+      <testcase name="test_digest_distinguishes_type_and_order" assertions="3" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004052" >
+      </testcase>
+      <testcase name="test_rejects_unsupported_values" assertions="20" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004665" >
+      </testcase>
+      <testcase name="test_decode_rejects_malformed_and_noncanonical_input" assertions="22" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.008816" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_content_registry.gd" tests="10" failures="0" skipped="0" time="0.028301" >
+      <testcase name="test_manifest_validates_with_stable_id" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004047" >
+      </testcase>
+      <testcase name="test_all_fifteen_crops_match_frs" assertions="136" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004328" >
+      </testcase>
+      <testcase name="test_wheat_and_corn_exact_microseconds" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001282" >
+      </testcase>
+      <testcase name="test_research_rows_and_gates" assertions="85" status="pass" classname="tests/unit/test_content_registry.gd" time="0.003473" >
+      </testcase>
+      <testcase name="test_wheat_is_the_only_start_unlock" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001705" >
+      </testcase>
+      <testcase name="test_skills_and_point_capacity" assertions="5" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001995" >
+      </testcase>
+      <testcase name="test_returned_definitions_are_copies" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001576" >
+      </testcase>
+      <testcase name="test_registry_is_isolated_from_later_manifest_edits" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004231" >
+      </testcase>
+      <testcase name="test_unknown_lookups_return_null" assertions="4" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001223" >
+      </testcase>
+      <testcase name="test_manifest_catalog_registers_and_resolves" assertions="7" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004441" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_integer_math.gd" tests="9" failures="0" skipped="0" time="0.043468" >
+      <testcase name="test_add_and_sub_limits" assertions="20" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001605" >
+      </testcase>
+      <testcase name="test_mul_limits_all_sign_cases" assertions="24" status="pass" classname="tests/unit/test_integer_math.gd" time="0.00219" >
+      </testcase>
+      <testcase name="test_floor_and_ceil_div_with_negatives" assertions="50" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001759" >
+      </testcase>
+      <testcase name="test_mul_div_matches_oracle_including_overflowing_intermediates" assertions="568" status="pass" classname="tests/unit/test_integer_math.gd" time="0.008844" >
+      </testcase>
+      <testcase name="test_small_remainder_product_exhaustive" assertions="1" status="pass" classname="tests/unit/test_integer_math.gd" time="0.022491" >
+      </testcase>
+      <testcase name="test_mul_div_rejects_invalid_operands" assertions="6" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001881" >
+      </testcase>
+      <testcase name="test_basis_point_rounding_rules" assertions="6" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001295" >
+      </testcase>
+      <testcase name="test_growth_duration_cap_and_minimum" assertions="16" status="pass" classname="tests/unit/test_integer_math.gd" time="0.002003" >
+      </testcase>
+      <testcase name="test_increasing_increment_recurrence" assertions="8" status="pass" classname="tests/unit/test_integer_math.gd" time="0.0014" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_invalid_content.gd" tests="24" failures="0" skipped="0" time="0.093432" >
+      <testcase name="test_null_manifest" assertions="2" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.001851" >
+      </testcase>
+      <testcase name="test_empty_manifest_id" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00391" >
+      </testcase>
+      <testcase name="test_duplicate_crop_id" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00445" >
+      </testcase>
+      <testcase name="test_invalid_crop_id_format" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003971" >
+      </testcase>
+      <testcase name="test_nonpositive_duration" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004362" >
+      </testcase>
+      <testcase name="test_negative_value" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003916" >
+      </testcase>
+      <testcase name="test_basic_crop_with_seed_cost" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004128" >
+      </testcase>
+      <testcase name="test_unknown_crop_class" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004276" >
+      </testcase>
+      <testcase name="test_stage_reference_count" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004411" >
+      </testcase>
+      <testcase name="test_empty_stage_reference" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003595" >
+      </testcase>
+      <testcase name="test_level_gate_out_of_range" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005215" >
+      </testcase>
+      <testcase name="test_missing_research_reference" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00432" >
+      </testcase>
+      <testcase name="test_research_unlocking_another_crop" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004193" >
+      </testcase>
+      <testcase name="test_research_for_unknown_crop" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004701" >
+      </testcase>
+      <testcase name="test_research_nonpositive_duration" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004494" >
+      </testcase>
+      <testcase name="test_start_unlock_unknown_or_researched" assertions="8" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.006885" >
+      </testcase>
+      <testcase name="test_crop_without_research_must_be_start_unlocked" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003667" >
+      </testcase>
+      <testcase name="test_curve_level_one_not_zero" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.002472" >
+      </testcase>
+      <testcase name="test_curve_not_strictly_increasing" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.0018" >
+      </testcase>
+      <testcase name="test_curve_continuation_invalid" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.002515" >
+      </testcase>
+      <testcase name="test_missing_curve" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.001815" >
+      </testcase>
+      <testcase name="test_skill_missing_prerequisite" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004175" >
+      </testcase>
+      <testcase name="test_skill_prerequisite_cycle" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004068" >
+      </testcase>
+      <testcase name="test_duplicate_skill" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004242" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_level_curve.gd" tests="8" failures="0" skipped="0" time="0.020205" >
+      <testcase name="test_registry_is_valid" assertions="1" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001214" >
+      </testcase>
+      <testcase name="test_all_representable_thresholds_match_oracle" assertions="351" status="pass" classname="tests/unit/test_level_curve.gd" time="0.007105" >
+      </testcase>
+      <testcase name="test_explicit_table_is_frs_section_5_1_unchanged" assertions="31" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001583" >
+      </testcase>
+      <testcase name="test_option_b_vectors_31_to_40" assertions="10" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001914" >
+      </testcase>
+      <testcase name="test_closed_form_adversary_does_not_match" assertions="2" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001213" >
+      </testcase>
+      <testcase name="test_below_at_above_every_explicit_threshold" assertions="87" status="pass" classname="tests/unit/test_level_curve.gd" time="0.003841" >
+      </testcase>
+      <testcase name="test_below_at_above_30_to_35" assertions="12" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001421" >
+      </testcase>
+      <testcase name="test_lookup_at_representation_boundary" assertions="8" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001914" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_smoke.gd" tests="1" failures="0" skipped="0" time="0.001232" >
+      <testcase name="test_runner_executes_typed_test" assertions="1" status="pass" classname="tests/unit/test_smoke.gd" time="0.001232" >
+      </testcase>
+  </testsuite>
+</testsuites>
