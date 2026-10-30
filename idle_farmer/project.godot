@@ -11,10 +11,10 @@ config_version=5
 [application]
 
 config/name="Idle Farmer"
+config/features=PackedStringArray("4.7")
 
 [debug]
 
-gdscript/warnings/exclude_addons=true
 gdscript/warnings/untyped_declaration=2
 
 [rendering]

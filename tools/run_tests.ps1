@@ -7,7 +7,8 @@
   2. Runs GUT via addons/gut/gut_cmdln.gd using res://.gutconfig.json.
   3. Saves the import log, test log and JUnit XML under artifacts/M01/test_runs/<UTC stamp>/.
   4. Fails with exit code 5 when any script failed to load/parse (GUT skips such files and exits 0).
-  5. Fails with exit code 2 when zero tests ran (GUT itself exits 0 in that case).
+  5. Fails with exit code 6 when objects leak at exit (a RefCounted reference cycle).
+  6. Fails with exit code 2 when zero tests ran (GUT itself exits 0 in that case).
   Otherwise returns GUT's exit code (0 = all passed, 1 = failures).
   Setup failures: 3 = Godot binary missing, 4 = import failed.
 
@@ -99,8 +100,17 @@ if (Test-Path $junit) {
 $scriptErrorPattern = 'SCRIPT ERROR|Parse Error|Failed to load script|Ignoring script'
 $scriptErrors = @(Select-String -Path $importLog, $testLog -Pattern $scriptErrorPattern)
 
+# Leaked objects at exit indicate a reference cycle (RefCounted never freed); fail fast on them.
+$leakPattern = 'instances were leaked at exit|resources still in use at exit'
+$leaks = @(Select-String -Path $testLog -Pattern $leakPattern)
+
 $verdict = $gutExit
-if ($gutExit -eq 0 -and $scriptErrors.Count -gt 0) {
+if ($gutExit -eq 0 -and $leaks.Count -gt 0) {
+    Write-Host 'LEAK GUARD: objects leaked at exit; failing the run.'
+    $leaks | ForEach-Object { Write-Host "  $($_.Line.Trim())" }
+    $verdict = 6
+}
+elseif ($gutExit -eq 0 -and $scriptErrors.Count -gt 0) {
     Write-Host 'SCRIPT-ERROR GUARD: script load/parse errors found; failing the run.'
     $scriptErrors | ForEach-Object { Write-Host "  $($_.Filename):$($_.LineNumber): $($_.Line.Trim())" }
     $verdict = 5
