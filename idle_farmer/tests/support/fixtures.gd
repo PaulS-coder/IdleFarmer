@@ -9,6 +9,7 @@ const PLAYER_ID: String = "player-test-0001"
 const CREATED_UTC_US: int = 1_790_000_000_000_000
 
 static var _registry: ContentRegistry = null
+static var _registry_v2: ContentRegistry = null
 
 
 ## Fixed UUID-shaped token, e.g. uuid("A") → "00000000-0000-4000-8000-00000000000A".
@@ -24,6 +25,22 @@ static func registry() -> ContentRegistry:
 
 static func new_game(epoch_tag: String = "A") -> GameState:
 	return GameState.new_game(SAVE_ID, PLAYER_ID, uuid(epoch_tag), CREATED_UTC_US, registry())
+
+
+## content_m02_v1: the M02 manifest (skill effects, equipment, fertilizers, expansion, economy).
+static func registry_v2() -> ContentRegistry:
+	if _registry_v2 == null:
+		_registry_v2 = ContentM02V1.build_registry()
+	return _registry_v2
+
+
+static func new_game_v2(epoch_tag: String = "A") -> GameState:
+	return GameState.new_game(SAVE_ID, PLAYER_ID, uuid(epoch_tag), CREATED_UTC_US, registry_v2())
+
+
+## Registry bound to `state` (v1 or v2).
+static func registry_for(state: GameState) -> ContentRegistry:
+	return registry_v2() if state.content_version == ContentM02V1.MANIFEST_ID else registry()
 
 
 ## Places a cycle on `plot_id` exactly as planting would record it (identity modifiers).
@@ -42,7 +59,7 @@ static func add_cycle(state: GameState, plot_id: int, crop_id: String, planted_a
 	cycle.seed_cost_paid = crop.seed_cost
 	cycle.gross_coin_reward = crop.base_coins
 	cycle.xp_reward = crop.base_xp
-	cycle.modifier_snapshot = {"growth_reduction_bp": 0, "coin_bonus_bp": 0}
+	cycle.modifier_snapshot = {"growth_reduction_bp": 0, "coin_bonus_bp": 0, "fertilizer_bonus_bp": 0}
 	cycle.content_version = state.content_version
 	state.plot(plot_id).crop_cycle = cycle
 	return cycle
@@ -81,11 +98,12 @@ static func unlock_crop(state: GameState, crop_id: String) -> void:
 
 
 ## Accepted PlantCrop at the state's current time, carrying the current quote's exact terms.
-static func plant_cmd(state: GameState, plot_id: int, crop_id: String, counter: int = 1) -> PlantCropCommand:
-	var q: PlantingQuote = FarmSystem.quote_for(state, registry(), crop_id)
+static func plant_cmd(state: GameState, plot_id: int, crop_id: String, counter: int = 1,
+		fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantCropCommand:
+	var q: PlantingQuote = FarmSystem.quote_for(state, registry_for(state), crop_id, fertilizer_id)
 	return PlantCropCommand.new(CommandId.new(state.save_id, state.command_replay.current_epoch, counter),
 		state.simulation_time_us, counter, plot_id, crop_id, state.content_version, q.seed_cost, q.growth_us,
-		q.gross_coins, q.xp)
+		q.gross_coins, q.xp, fertilizer_id, q.fertilizer_cost)
 
 
 ## Accepted HarvestCrop naming the plot's current cycle.

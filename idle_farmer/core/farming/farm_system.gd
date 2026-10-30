@@ -8,15 +8,18 @@ extends RefCounted
 ## Manual planting does not change `selected_crop_id`: selection is configuration, not a purchase.
 
 
-## Failure code for planting `crop_id` on `plot_id`, up to (not including) term/affordability
-## checks; FailureCode.NONE when the target and gates allow planting.
-static func check_plant_target(state: GameState, registry: ContentRegistry, plot_id: int, crop_id: String) -> String:
+## Failure code for planting `crop_id` with `fertilizer_id` on `plot_id`, up to (not including)
+## term/affordability checks; FailureCode.NONE when the target and gates allow planting.
+static func check_plant_target(state: GameState, registry: ContentRegistry, plot_id: int, crop_id: String,
+		fertilizer_id: String = FertilizerDefinition.NONE_ID) -> String:
 	var plot: PlotState = state.plot(plot_id)
 	if plot == null:
 		return FailureCode.UNKNOWN_PLOT
 	var crop: CropDefinition = registry.crop(crop_id)
 	if crop == null:
 		return FailureCode.UNKNOWN_CROP
+	if registry.fertilizer(fertilizer_id) == null:
+		return FailureCode.UNKNOWN_FERTILIZER
 	if not plot.unlocked:
 		return FailureCode.PLOT_LOCKED
 	if plot.crop_cycle != null:
@@ -28,30 +31,38 @@ static func check_plant_target(state: GameState, registry: ContentRegistry, plot
 	return FailureCode.NONE
 
 
-## The quote a player would confirm for planting `crop_id` now (previews and execution share it).
-static func quote_for(state: GameState, registry: ContentRegistry, crop_id: String) -> PlantingQuote:
+## The quote a player would confirm for planting `crop_id` with `fertilizer_id` now (previews and
+## execution share it). Not ok for an unknown crop or fertilizer.
+static func quote_for(state: GameState, registry: ContentRegistry, crop_id: String,
+		fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantingQuote:
 	var crop: CropDefinition = registry.crop(crop_id)
-	if crop == null:
+	var fertilizer: FertilizerDefinition = registry.fertilizer(fertilizer_id)
+	if crop == null or fertilizer == null:
 		return PlantingQuote.new()
-	return EconomySystem.quote_planting(crop, state.content_version, EconomySystem.current_modifiers(state))
+	var snapshot: ModifierSnapshot = ModifierSnapshot.for_state(state, registry, fertilizer_id)
+	return EconomySystem.quote_planting(crop, state.content_version, snapshot, fertilizer)
 
 
-## Executes an accepted PlantCrop at the state's current simulation time.
+## Executes an accepted PlantCrop at the state's current simulation time. Seed and fertilizer are
+## charged together (all-or-nothing) and recorded as separate transactions (M02 E13).
 static func plant(state: GameState, registry: ContentRegistry, scheduler: EventScheduler, command: PlantCropCommand) -> CommandResult:
 	var now: int = state.simulation_time_us
-	var failure: String = check_plant_target(state, registry, command.plot_id(), command.crop_id())
+	var failure: String = check_plant_target(state, registry, command.plot_id(), command.crop_id(), command.fertilizer_id())
 	if failure != FailureCode.NONE:
-		return CommandResult.failed(failure, "plot %d crop '%s'" % [command.plot_id(), command.crop_id()], command.command_id(), state.state_sequence)
-	var quote: PlantingQuote = quote_for(state, registry, command.crop_id())
+		return CommandResult.failed(failure, "plot %d crop '%s' fertilizer '%s'" % [command.plot_id(), command.crop_id(),
+			command.fertilizer_id()], command.command_id(), state.state_sequence)
+	var quote: PlantingQuote = quote_for(state, registry, command.crop_id(), command.fertilizer_id())
 	if not quote.ok:
 		return CommandResult.failed(FailureCode.NUMERIC_LIMIT, "quote not representable", command.command_id(), state.state_sequence)
 	if not quote.matches(command):
 		return CommandResult.failed(FailureCode.STALE_TERMS, "confirmed terms differ from current quote", command.command_id(), state.state_sequence)
-	if state.player.coins < quote.seed_cost:
-		return CommandResult.failed(FailureCode.INSUFFICIENT_COINS, "need %d coins" % quote.seed_cost, command.command_id(), state.state_sequence)
-	var coins_after: MathResult = IntegerMath.sub(state.player.coins, quote.seed_cost)
+	var total_cost: MathResult = quote.total_cost()
+	if total_cost.ok and state.player.coins < total_cost.value:
+		return CommandResult.failed(FailureCode.INSUFFICIENT_COINS, "need %d coins" % total_cost.value, command.command_id(), state.state_sequence)
+	var has_fertilizer: bool = quote.fertilizer_id != FertilizerDefinition.NONE_ID
+	var coins_after: MathResult = IntegerMath.sub(state.player.coins, total_cost.value) if total_cost.ok else total_cost
 	var matures_at: MathResult = IntegerMath.add(now, quote.growth_us)
-	var id_room: MathResult = IntegerMath.add(state.next_entity_id, 2)
+	var id_room: MathResult = IntegerMath.add(state.next_entity_id, 3 if has_fertilizer else 2)
 	var seq_room: MathResult = IntegerMath.add(state.next_insertion_sequence, 1)
 	if not (coins_after.ok and matures_at.ok and id_room.ok and seq_room.ok):
 		return CommandResult.failed(FailureCode.NUMERIC_LIMIT, "planting values not representable", command.command_id(), state.state_sequence)
@@ -60,6 +71,8 @@ static func plant(state: GameState, registry: ContentRegistry, scheduler: EventS
 	var cycle: CropCycle = CropCycle.new()
 	cycle.cycle_id = state.allocate_entity_id()
 	cycle.planting_transaction_id = state.allocate_entity_id()
+	if has_fertilizer:
+		cycle.fertilizer_transaction_id = state.allocate_entity_id()
 	cycle.maturity_insertion_seq = state.allocate_insertion_sequence()
 	cycle.plot_id = command.plot_id()
 	cycle.crop_id = quote.crop_id
@@ -68,6 +81,8 @@ static func plant(state: GameState, registry: ContentRegistry, scheduler: EventS
 	cycle.effective_growth_us = quote.growth_us
 	cycle.matures_at_us = matures_at.value
 	cycle.seed_cost_paid = quote.seed_cost
+	cycle.fertilizer_id = quote.fertilizer_id
+	cycle.fertilizer_cost_paid = quote.fertilizer_cost
 	cycle.gross_coin_reward = quote.gross_coins
 	cycle.xp_reward = quote.xp
 	cycle.modifier_snapshot = quote.modifiers.duplicate()
@@ -83,8 +98,12 @@ static func plant(state: GameState, registry: ContentRegistry, scheduler: EventS
 	result.transactions.append(EconomicTransaction.new(cycle.planting_transaction_id, now, EconomicTransaction.TYPE_SEED_PURCHASE,
 		cycle.plot_id, cycle.cycle_id, -quote.seed_cost, 0, EconomicTransaction.CATEGORY_SEEDS, quote.manifest_id,
 		EconomicTransaction.ORIGIN_MANUAL))
+	if has_fertilizer:
+		result.transactions.append(EconomicTransaction.new(cycle.fertilizer_transaction_id, now,
+			EconomicTransaction.TYPE_FERTILIZER_PURCHASE, cycle.plot_id, cycle.cycle_id, -quote.fertilizer_cost, 0,
+			EconomicTransaction.CATEGORY_FERTILIZER, quote.manifest_id, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.CROP_PLANTED, now, cycle.plot_id, cycle.cycle_id,
-		{"crop_id": cycle.crop_id, "matures_at_us": cycle.matures_at_us}))
+		{"crop_id": cycle.crop_id, "fertilizer_id": cycle.fertilizer_id, "matures_at_us": cycle.matures_at_us}))
 	return result
 
 

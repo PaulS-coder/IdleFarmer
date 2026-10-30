@@ -175,6 +175,10 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 		seen_cycles[cycle.cycle_id.key()] = true
 		if cycle.cycle_id.save_id != save_id or cycle.cycle_id.counter >= next_entity_id:
 			errors.append("CYCLE_ID_FOREIGN: %s not allocated by this save" % cycle.cycle_id.key())
+		if registry.fertilizer(cycle.fertilizer_id) == null:
+			errors.append("CYCLE_FERTILIZER_UNKNOWN: plot %d '%s'" % [p.plot_id, cycle.fertilizer_id])
+		if cycle.fertilizer_transaction_id != null and cycle.fertilizer_transaction_id.counter >= next_entity_id:
+			errors.append("CYCLE_TRANSACTION_ID_FOREIGN: plot %d fertilizer" % p.plot_id)
 		if cycle.planting_transaction_id != null and cycle.planting_transaction_id.counter >= next_entity_id:
 			errors.append("CYCLE_TRANSACTION_ID_FOREIGN: plot %d" % p.plot_id)
 		if seen_sequences.has(cycle.maturity_insertion_seq) or cycle.maturity_insertion_seq >= next_insertion_sequence:

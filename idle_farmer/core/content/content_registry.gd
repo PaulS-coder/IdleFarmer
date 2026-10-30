@@ -7,6 +7,8 @@ extends RefCounted
 ## copies so callers cannot change registered definitions.
 
 const _ID_PATTERN: String = "^[a-z][a-z0-9_]*$"
+## DEC-008/G5: families deferred beyond v1 must never appear as saleable content.
+const DEFERRED_CONTENT_IDS: PackedStringArray = ["seed_efficiency", "research_facilities", "growth_booster"]
 
 var errors: PackedStringArray = PackedStringArray()
 
@@ -20,6 +22,13 @@ var _start_unlocked: PackedStringArray = PackedStringArray()
 ## `_thresholds[i]` = cumulative XP for level i + 1, up to the last int64-representable level.
 var _thresholds: PackedInt64Array = PackedInt64Array()
 var _explicit_level_count: int = 0
+# M02 tables (empty / null for content_m01_v1).
+var _upgrade_order: PackedStringArray = PackedStringArray()
+var _upgrades: Dictionary[String, Array] = {}  # family → Array[UpgradeDefinition] ordered by rank
+var _fertilizer_order: PackedStringArray = PackedStringArray()  # by tier
+var _fertilizers: Dictionary[String, FertilizerDefinition] = {}
+var _bands: Array[ExpansionBand] = []
+var _economy: EconomyParameters = null
 
 
 static func build(manifest: ContentManifest) -> ContentRegistry:
@@ -119,6 +128,62 @@ func explicit_level_count() -> int:
 	return _explicit_level_count
 
 
+## True for manifests that carry the M02 economy tables (content_m02_v1 and later).
+func has_economy_tables() -> bool:
+	return _economy != null
+
+
+func growth_cap_bp() -> int:
+	return _economy.growth_cap_bp if _economy != null else EconomyParameters.LEGACY_GROWTH_CAP_BP
+
+
+## Copy of the economy parameters, or null for manifests without them.
+func economy() -> EconomyParameters:
+	return null if _economy == null else _economy.duplicate() as EconomyParameters
+
+
+func upgrade_family_ids() -> PackedStringArray:
+	return _upgrade_order.duplicate()
+
+
+func upgrade_max_rank(family_id: String) -> int:
+	return (_upgrades[family_id] as Array).size() if _upgrades.has(family_id) else 0
+
+
+## Copy of rank `rank` of `family_id`, or null.
+func upgrade(family_id: String, rank: int) -> UpgradeDefinition:
+	if not _upgrades.has(family_id) or rank < 1 or rank > (_upgrades[family_id] as Array).size():
+		return null
+	return ((_upgrades[family_id] as Array)[rank - 1] as UpgradeDefinition).duplicate() as UpgradeDefinition
+
+
+## Fertilizer IDs ordered by tier. `none` is always available, even without a fertilizer table.
+func fertilizer_ids() -> PackedStringArray:
+	if _fertilizer_order.is_empty():
+		return PackedStringArray([FertilizerDefinition.NONE_ID])
+	return _fertilizer_order.duplicate()
+
+
+## Copy of the fertilizer, the implicit `none` when the manifest has no table, or null if unknown.
+func fertilizer(fertilizer_id: String) -> FertilizerDefinition:
+	if _fertilizers.has(fertilizer_id):
+		return _fertilizers[fertilizer_id].duplicate() as FertilizerDefinition
+	if fertilizer_id == FertilizerDefinition.NONE_ID and _fertilizers.is_empty():
+		var none: FertilizerDefinition = FertilizerDefinition.new()
+		none.id = FertilizerDefinition.NONE_ID
+		none.display_name = "None"
+		return none
+	return null
+
+
+## Copy of the band containing `plot_id`, or null (plots 1–24, or manifests without bands).
+func expansion_band(plot_id: int) -> ExpansionBand:
+	for band: ExpansionBand in _bands:
+		if plot_id >= band.first_plot and plot_id <= band.last_plot:
+			return band.duplicate() as ExpansionBand
+	return null
+
+
 func _load(manifest: ContentManifest) -> void:
 	_manifest_id = manifest.manifest_id
 	if _manifest_id.is_empty():
@@ -128,11 +193,18 @@ func _load(manifest: ContentManifest) -> void:
 	_load_crops(manifest.crops)
 	_load_start_unlocks(manifest.start_unlocked_crop_ids)
 	_load_skills(manifest.skills)
+	_load_economy_tables(manifest)
 	if not errors.is_empty():
 		_crops.clear()
 		_research.clear()
 		_skills.clear()
 		_thresholds = PackedInt64Array()
+		_upgrades.clear()
+		_upgrade_order = PackedStringArray()
+		_fertilizers.clear()
+		_fertilizer_order = PackedStringArray()
+		_bands.clear()
+		_economy = null
 
 
 func _load_curve(curve: LevelCurveDefinition) -> void:
@@ -274,6 +346,120 @@ func _load_skills(items: Array[SkillDefinition]) -> void:
 			steps += 1
 		if steps > _skill_order.size():
 			errors.append("SKILL_PREREQUISITE_CYCLE: '%s'" % skill_id)
+
+
+func _load_economy_tables(manifest: ContentManifest) -> void:
+	for skill_id: String in _skill_order:
+		var skill: SkillDefinition = _skills[skill_id]
+		if not SkillDefinition.EFFECT_KINDS.has(skill.effect_kind):
+			errors.append("SKILL_EFFECT_INVALID: '%s' has effect '%s'" % [skill_id, skill.effect_kind])
+		elif skill.effect_bp_per_rank < 0:
+			errors.append("SKILL_EFFECT_NEGATIVE: '%s'" % skill_id)
+		elif skill.effect_kind == SkillDefinition.EFFECT_CAPABILITY and skill.capability_id.is_empty():
+			errors.append("SKILL_CAPABILITY_MISSING: '%s'" % skill_id)
+		elif skill.effect_kind != SkillDefinition.EFFECT_CAPABILITY and not skill.capability_id.is_empty():
+			errors.append("SKILL_CAPABILITY_UNEXPECTED: '%s'" % skill_id)
+	var present: Array[bool] = [not manifest.upgrades.is_empty(), not manifest.fertilizers.is_empty(),
+		not manifest.expansion_bands.is_empty(), manifest.economy != null]
+	if not present.has(true):
+		return
+	if present.has(false):
+		errors.append("ECONOMY_TABLES_INCOMPLETE: upgrades, fertilizers, expansion bands and economy must be supplied together")
+		return
+	_load_upgrades(manifest.upgrades)
+	_load_fertilizers(manifest.fertilizers)
+	_load_bands(manifest.expansion_bands)
+	_load_economy(manifest.economy)
+
+
+func _load_upgrades(items: Array[UpgradeDefinition]) -> void:
+	var by_family: Dictionary[String, Array] = {}
+	for item: UpgradeDefinition in items:
+		if item == null or not _valid_id(item.family_id):
+			errors.append("UPGRADE_ID_INVALID: '%s'" % ("" if item == null else item.family_id))
+			continue
+		if DEFERRED_CONTENT_IDS.has(item.family_id):
+			errors.append("DEFERRED_CONTENT: '%s' is deferred beyond v1 (DEC-008)" % item.family_id)
+			continue
+		if item.cost <= 0 or item.effect_bp < 0 or item.min_level < 1:
+			errors.append("UPGRADE_VALUE_INVALID: '%s' rank %d" % [item.family_id, item.rank])
+		if item.effect_kind != UpgradeDefinition.EFFECT_GROWTH_REDUCTION and item.effect_kind != UpgradeDefinition.EFFECT_COIN_BONUS:
+			errors.append("UPGRADE_EFFECT_INVALID: '%s' rank %d" % [item.family_id, item.rank])
+		if not by_family.has(item.family_id):
+			by_family[item.family_id] = []
+			_upgrade_order.append(item.family_id)
+		by_family[item.family_id].append(item.duplicate())
+	for family_id: String in _upgrade_order:
+		var ranks: Array = by_family[family_id]
+		ranks.sort_custom(func(a: UpgradeDefinition, b: UpgradeDefinition) -> bool: return a.rank < b.rank)
+		for i: int in ranks.size():
+			if (ranks[i] as UpgradeDefinition).rank != i + 1:
+				errors.append("UPGRADE_RANKS_NOT_CONTIGUOUS: '%s' must have ranks 1..%d" % [family_id, ranks.size()])
+				break
+		_upgrades[family_id] = ranks
+
+
+func _load_fertilizers(items: Array[FertilizerDefinition]) -> void:
+	var tiers: Dictionary[int, bool] = {}
+	var sorted: Array[FertilizerDefinition] = []
+	for item: FertilizerDefinition in items:
+		if item == null or not _valid_id(item.id):
+			errors.append("FERTILIZER_ID_INVALID: '%s'" % ("" if item == null else item.id))
+			continue
+		if DEFERRED_CONTENT_IDS.has(item.id):
+			errors.append("DEFERRED_CONTENT: '%s' is deferred beyond v1 (DEC-008)" % item.id)
+			continue
+		if _fertilizers.has(item.id) or tiers.has(item.tier):
+			errors.append("FERTILIZER_DUPLICATE: '%s' tier %d" % [item.id, item.tier])
+			continue
+		if item.tier < 0 or item.coin_bonus_bp < 0 or item.price_coef_bp < 0 or item.price_floor < 0:
+			errors.append("FERTILIZER_VALUE_INVALID: '%s'" % item.id)
+		var is_none: bool = item.id == FertilizerDefinition.NONE_ID
+		if is_none and (item.tier != 0 or item.coin_bonus_bp != 0 or item.price_coef_bp != 0 or item.price_floor != 0):
+			errors.append("FERTILIZER_NONE_INVALID: 'none' must be tier 0, free and without effect")
+		if not is_none and item.tier == 0:
+			errors.append("FERTILIZER_TIER_INVALID: only 'none' may be tier 0 ('%s')" % item.id)
+		tiers[item.tier] = true
+		_fertilizers[item.id] = item.duplicate() as FertilizerDefinition
+		sorted.append(_fertilizers[item.id])
+	if not _fertilizers.has(FertilizerDefinition.NONE_ID):
+		errors.append("FERTILIZER_NONE_MISSING: a fertilizer table must include 'none'")
+	sorted.sort_custom(func(a: FertilizerDefinition, b: FertilizerDefinition) -> bool: return a.tier < b.tier)
+	for item: FertilizerDefinition in sorted:
+		_fertilizer_order.append(item.id)
+
+
+func _load_bands(items: Array[ExpansionBand]) -> void:
+	var sorted: Array[ExpansionBand] = []
+	for item: ExpansionBand in items:
+		if item == null:
+			errors.append("EXPANSION_BAND_NULL: null band")
+			continue
+		sorted.append(item.duplicate() as ExpansionBand)
+	sorted.sort_custom(func(a: ExpansionBand, b: ExpansionBand) -> bool: return a.first_plot < b.first_plot)
+	var expected: int = ExpansionBand.FIRST_PURCHASABLE_PLOT
+	for band: ExpansionBand in sorted:
+		if band.first_plot != expected or band.last_plot < band.first_plot:
+			errors.append("EXPANSION_BANDS_NOT_CONTIGUOUS: expected a band starting at plot %d" % expected)
+			return
+		if band.cost <= 0 or band.required_level < 1 or (not _thresholds.is_empty() and band.required_level > _thresholds.size()):
+			errors.append("EXPANSION_BAND_INVALID: plots %d-%d" % [band.first_plot, band.last_plot])
+		expected = band.last_plot + 1
+	if expected != ExpansionBand.LAST_PURCHASABLE_PLOT + 1:
+		errors.append("EXPANSION_BANDS_INCOMPLETE: bands must cover plots %d-%d exactly" % [ExpansionBand.FIRST_PURCHASABLE_PLOT, ExpansionBand.LAST_PURCHASABLE_PLOT])
+		return
+	_bands = sorted
+
+
+func _load_economy(parameters: EconomyParameters) -> void:
+	if parameters.growth_cap_bp < 0 or parameters.growth_cap_bp > 10_000:
+		errors.append("ECONOMY_GROWTH_CAP_RANGE: %d" % parameters.growth_cap_bp)
+	if parameters.reset_minimum < 0 or parameters.reset_level_factor < 0:
+		errors.append("ECONOMY_RESET_NEGATIVE: reset price inputs must be nonnegative")
+	if parameters.budget_reserve_default < 0 or parameters.budget_protection_percent_default < 0 \
+			or parameters.budget_protection_percent_default > 100:
+		errors.append("ECONOMY_BUDGET_DEFAULT_RANGE: reserve >= 0, protection 0-100")
+	_economy = parameters.duplicate() as EconomyParameters
 
 
 func _valid_id(value: String) -> bool:

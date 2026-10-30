@@ -6,9 +6,11 @@ extends RefCounted
 
 const TYPE_SEED_PURCHASE: String = "seed_purchase"
 const TYPE_HARVEST_CREDIT: String = "harvest_credit"
+const TYPE_FERTILIZER_PURCHASE: String = "fertilizer_purchase"
 
 const CATEGORY_SEEDS: String = "seeds"
 const CATEGORY_HARVEST: String = "harvest"
+const CATEGORY_FERTILIZER: String = "fertilizer"
 
 const ORIGIN_MANUAL: String = "manual"
 const ORIGIN_AUTOMATIC: String = "automatic"

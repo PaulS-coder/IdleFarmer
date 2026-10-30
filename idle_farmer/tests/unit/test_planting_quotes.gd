@@ -10,8 +10,9 @@ func before_all() -> void:
 
 
 func _quote(crop_id: String, reduction: int = 0, bonus: int = 0) -> PlantingQuote:
-	return EconomySystem.quote_planting(registry.crop(crop_id), registry.manifest_id(),
-		{EconomySystem.MOD_GROWTH_REDUCTION_BP: reduction, EconomySystem.MOD_COIN_BONUS_BP: bonus})
+	var none: FertilizerDefinition = registry.fertilizer(FertilizerDefinition.NONE_ID)
+	var snapshot: ModifierSnapshot = ModifierSnapshot.from_values(reduction, bonus, registry.growth_cap_bp(), none)
+	return EconomySystem.quote_planting(registry.crop(crop_id), registry.manifest_id(), snapshot, none)
 
 
 func test_wheat_base_quote() -> void:

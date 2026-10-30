@@ -18,7 +18,7 @@ var planted_at_us: int = 0
 var matures_at_us: int = 0
 var effective_growth_us: int = 0
 var seed_cost_paid: int = 0
-var fertilizer_id: String = ""
+var fertilizer_id: String = FertilizerDefinition.NONE_ID
 var fertilizer_cost_paid: int = 0
 var gross_coin_reward: int = 0
 var xp_reward: int = 0
@@ -26,6 +26,8 @@ var xp_reward: int = 0
 var modifier_snapshot: Dictionary[String, int] = {}
 var content_version: String = ""
 var planting_transaction_id: EntityId
+## Separate fertilizer purchase transaction (M02 E13); null when the fertilizer is `none`.
+var fertilizer_transaction_id: EntityId = null
 ## Insertion sequence of this cycle's maturity event, so a rebuilt queue reproduces exact keys (B2).
 var maturity_insertion_seq: int = 0
 
@@ -56,6 +58,11 @@ func validate() -> PackedStringArray:
 		errors.append("CYCLE_MATURITY_MISMATCH: %s" % label)
 	if seed_cost_paid < 0 or fertilizer_cost_paid < 0 or gross_coin_reward < 0 or xp_reward < 0:
 		errors.append("CYCLE_NEGATIVE_VALUE: %s" % label)
+	var has_fertilizer: bool = fertilizer_id != FertilizerDefinition.NONE_ID
+	if fertilizer_id.is_empty() or has_fertilizer != (fertilizer_transaction_id != null) \
+			or (fertilizer_transaction_id != null and not fertilizer_transaction_id.is_valid()) \
+			or (not has_fertilizer and fertilizer_cost_paid != 0):
+		errors.append("CYCLE_FERTILIZER_INCONSISTENT: %s" % label)
 	if content_version.is_empty():
 		errors.append("CYCLE_CONTENT_VERSION_EMPTY: %s" % label)
 	if maturity_insertion_seq < 1:
@@ -80,6 +87,7 @@ func to_primitive() -> Dictionary:
 		"modifier_snapshot": PrimitiveReader.plain(modifier_snapshot),
 		"content_version": content_version,
 		"planting_transaction_id": EntityId.nullable_to_primitive(planting_transaction_id),
+		"fertilizer_transaction_id": EntityId.nullable_to_primitive(fertilizer_transaction_id),
 		"maturity_insertion_seq": maturity_insertion_seq,
 	}
 
@@ -89,7 +97,7 @@ static func from_primitive(value: Variant) -> CropCycle:
 	reader.expect_only(PackedStringArray([
 		"cycle_id", "plot_id", "crop_id", "status", "planted_at_us", "matures_at_us", "effective_growth_us",
 		"seed_cost_paid", "fertilizer_id", "fertilizer_cost_paid", "gross_coin_reward", "xp_reward",
-		"modifier_snapshot", "content_version", "planting_transaction_id", "maturity_insertion_seq",
+		"modifier_snapshot", "content_version", "planting_transaction_id", "fertilizer_transaction_id", "maturity_insertion_seq",
 	]))
 	var cycle: CropCycle = CropCycle.new()
 	cycle.cycle_id = EntityId.from_primitive(reader.dict_field("cycle_id"))
@@ -108,6 +116,11 @@ static func from_primitive(value: Variant) -> CropCycle:
 	cycle.content_version = reader.string_field("content_version")
 	cycle.planting_transaction_id = EntityId.from_primitive(reader.dict_field("planting_transaction_id"))
 	cycle.maturity_insertion_seq = reader.int_field("maturity_insertion_seq")
+	var fert_tx: Variant = reader.nullable_field("fertilizer_transaction_id")
+	if fert_tx != null:
+		cycle.fertilizer_transaction_id = EntityId.from_primitive(fert_tx)
+		if cycle.fertilizer_transaction_id == null:
+			reader.absorb(PackedStringArray(["CropCycle: malformed fertilizer_transaction_id"]))
 	if not reader.ok() or cycle.cycle_id == null or cycle.planting_transaction_id == null:
 		return null
 	return cycle

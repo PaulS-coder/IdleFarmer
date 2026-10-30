@@ -29,6 +29,7 @@ static func catalog(extra: Array[ContentManifest] = [], include_v1: bool = true)
 	var c: ManifestCatalog = ManifestCatalog.new()
 	if include_v1:
 		c.register(Fixtures.registry())
+		c.register(Fixtures.registry_v2())
 	for manifest: ContentManifest in extra:
 		c.register(ContentRegistry.build(manifest))
 	return c

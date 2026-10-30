@@ -98,6 +98,61 @@ def frontier_cases(rng: random.Random):
     return cases
 
 
+# Independent transcription of FRS §4.2 (crops), §5.2–5.3 (skill effects), §6.1 (equipment) and
+# §6.2 (fertilizers) for the modifier/price oracle.
+CROPS = {
+    "wheat": (8, 0, 16, 6), "carrots": (15, 0, 36, 12), "corn": (30, 18, 110, 32),
+    "tomatoes": (60, 55, 270, 70), "pumpkins": (180, 300, 1200, 230), "sunflowers": (90, 230, 810, 125),
+    "strawberries": (45, 185, 445, 105), "blueberries": (120, 450, 1600, 180), "soybeans": (60, 300, 785, 185),
+    "grapes": (240, 2000, 5900, 480), "coffee": (180, 1900, 4400, 750), "cotton": (300, 4500, 12500, 950),
+    "rice": (75, 1150, 2900, 370), "vanilla": (360, 7200, 24500, 1900), "saffron": (120, 6000, 10000, 1100),
+}
+GROWTH_SKILLS = {"faster_germination": (400, 5), "improved_cultivation": (300, 5), "climate_control": (500, 3)}
+COIN_SKILLS = {"efficient_harvest": (800, 5), "soil_productivity": (1200, 5), "premium_produce": (2000, 3)}
+IRRIGATION_BP = [500] * 6
+SOIL_BP = [1000, 1000, 1500, 1500, 2000]
+FERTILIZERS = {"none": (0, 0, 0), "basic": (2500, 1500, 20), "premium": (5000, 3500, 75), "advanced": (10000, 7800, 240)}
+CAP_BP = 6000
+
+
+def ceil_div(a, d):
+    return -((-a) // d)
+
+
+def fert_price(fert, base):
+    bonus, coef, floor = FERTILIZERS[fert]
+    return 0 if fert == "none" else max(floor, ceil_div(base * coef, 10000))
+
+
+def modifier_case(crop, ranks, irrigation, soil, fert):
+    minutes, seed, base, xp = CROPS[crop]
+    growth = sum(GROWTH_SKILLS[s][0] * r for s, r in ranks.items() if s in GROWTH_SKILLS) + sum(IRRIGATION_BP[:irrigation])
+    coins = sum(COIN_SKILLS[s][0] * r for s, r in ranks.items() if s in COIN_SKILLS) + sum(SOIL_BP[:soil])
+    capped = min(growth, CAP_BP)
+    growth_us = max(1, ceil_div(minutes * 60_000_000 * (10000 - capped), 10000))
+    gross = base * (10000 + coins + FERTILIZERS[fert][0]) // 10000
+    plain = base * (10000 + coins) // 10000
+    price = fert_price(fert, base)
+    return [crop, sorted([list(x) for x in ranks.items()]), irrigation, soil, fert, growth, capped, growth_us,
+            gross, plain, xp, price, gross - plain - price, gross - seed - price]
+
+
+def modifier_cases(rng):
+    cases = [
+        modifier_case("tomatoes", {}, 0, 0, "basic"),  # T-004: 55 / 41 / 337 / 70 / 241
+        modifier_case("wheat", {"faster_germination": 5, "improved_cultivation": 5, "climate_control": 3}, 6, 0, "none"),
+        modifier_case("tomatoes", {"faster_germination": 5, "improved_cultivation": 5, "climate_control": 3}, 6, 5, "advanced"),
+        modifier_case("vanilla", {"efficient_harvest": 5, "soil_productivity": 5, "premium_produce": 3}, 0, 5, "advanced"),
+    ]
+    all_skills = list(GROWTH_SKILLS.items()) + list(COIN_SKILLS.items())
+    for _ in range(80):
+        ranks = {s: rng.randint(0, m) for s, (_, m) in all_skills if rng.random() < 0.6}
+        ranks = {s: r for s, r in ranks.items() if r > 0}
+        cases.append(modifier_case(rng.choice(sorted(CROPS)), ranks, rng.randint(0, 6), rng.randint(0, 5),
+                                   rng.choice(sorted(FERTILIZERS))))
+    return cases
+
+
 def gd(v):
     if isinstance(v, str):
         return '"' + v + '"'
@@ -127,6 +182,17 @@ def main() -> None:
         tiers, spend, rate = solve(plots, budget)
         plot_list = [[p[0], p[1], [list(o) for o in p[2]]] for p in plots]
         lines.append("\t" + gd([name, budget, plot_list, tiers, spend, str(rate.numerator), str(rate.denominator)]) + ",")
+    lines.append("]")
+    lines += ["", "## [crop, [[skill, rank], ...], irrigation rank, soil rank, fertilizer, uncapped growth bp,",
+              "##  capped growth bp, growth_us, gross, gross without fertilizer, xp, fertilizer price,",
+              "##  incremental fertilizer net, completed-cycle profit]",
+              "const MODIFIERS: Array[Array] = ["]
+    for case in modifier_cases(rng):
+        lines.append("	" + gd(case) + ",")
+    lines += ["]", "", "## [crop, fertilizer, price] for every crop × fertilizer (FRS §6.2).", "const PRICES: Array[Array] = ["]
+    for crop in sorted(CROPS):
+        for fert in sorted(FERTILIZERS):
+            lines.append("	" + gd([crop, fert, fert_price(fert, CROPS[crop][2])]) + ",")
     lines.append("]")
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {OUT}")

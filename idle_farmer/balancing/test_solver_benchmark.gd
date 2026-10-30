@@ -3,12 +3,13 @@ extends GutTest
 ## run with `tools/run_tests.ps1 -Dir res://balancing`. Reports median wall time over repeated
 ## solves of 32-plot groups; correctness is covered by tests/unit/test_rate_frontier.gd.
 ##
-## Gate (provisional engineering threshold): worst case ≤ 50 ms, uniform single-class farm ≤ 2 ms.
+## Gate (provisional engineering threshold): worst case ≤ 50 ms, uniform single-class farm ≤ 5 ms
+## (amended by the owner on 2026-10-30 after the S0 measurement of 3.0 ms; see build plan B3).
 
 const RUNS: int = 7
 const MIN_US: int = 60_000_000
 const GATE_WORST_MS: float = 50.0
-const GATE_UNIFORM_MS: float = 2.0
+const GATE_UNIFORM_MS: float = 5.0
 
 ## FRS §4.2 / §6.2 net gains (Basic/Premium/Advanced) and prices for crops with profitable fertilizer.
 const CROPS: Array[Array] = [
