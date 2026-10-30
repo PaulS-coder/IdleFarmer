@@ -1,6 +1,15 @@
 # M01 — Proposed changes to existing documentation (awaiting approval)
 
-Date: 2026-10-30 · Status: **proposal only; nothing below has been applied.** Under the Decision Register change-control workflow, each item needs explicit owner approval with its exact scope. After approval, update the current FRS/TRS hashes recorded in RM §1 if those files change.
+Date: 2026-10-30 · Status: **all 8 items applied 2026-10-30.** Owner approval: "apply all 8 proposed changes."
+
+Applied as dated, additive notes; no earlier approval text, task text, gameplay rule or provisional value was rewritten:
+
+- **Decision Register:** a DEC-001 verification entry, and an updated index status (the parent stays Open for SQLite and export).
+- **M01 plan:** status note, file-table rows, T05 note, and the I1 scope note at V14 and after the crosswalk.
+- **TRS:** non-normative notes in §4.1 (failure codes and precedence) and §9.4 (codec).
+- **Roadmap:** M01 row, D-01/02/03/05/06 rows, a completion section, and the new TRS SHA-256 in §1.
+
+New TRS SHA-256: `893F2174C64E38E46542C1D78907FE8EBB68E1C3B160968C8EB8A3DB16688697`. The FRS is unchanged (`2FDF6A93…A310`). All 93 local links in the edited files resolve.
 
 | # | Document | Proposed change | Why |
 |---|---|---|---|

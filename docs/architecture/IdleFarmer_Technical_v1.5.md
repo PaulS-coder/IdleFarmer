@@ -204,6 +204,13 @@ A raw UI intent carries target/confirmation terms and a stable pending-delivery 
 
 Commands return structured `CommandResult` with `success`, failure code, affected entity IDs, generated authoritative events/transactions, and resulting state revision. Typical failures: `INSUFFICIENT_COINS`, `PLOT_LOCKED`, `PLOT_UNLOCK_ORDER_REQUIRED`, `PLOT_OCCUPIED`, `CROP_NOT_READY`, `LEVEL_REQUIRED`, `RESEARCH_REQUIRED`, `SKILL_NOT_UNLOCKED`, `INVALID_CONFIGURATION`, `DUPLICATE_COMMAND`, `STALE_COMMAND`, `INVALID_COMMAND_TIME`, `PERSISTENCE_UNAVAILABLE`.
 
+**M01 implementation note — 2026-10-30 (non-normative):**
+
+- **Additional failure codes in use:** `UNKNOWN_PLOT`, `UNKNOWN_CROP`, `NO_CYCLE`, `CYCLE_MISMATCH`, `MALFORMED_ENVELOPE`, `STALE_TERMS` and `NUMERIC_LIMIT`. `INVALID_CONFIGURATION` and `SKILL_NOT_UNLOCKED` are reserved for M02 commands.
+- **Check precedence (the first failure is reported):** `MALFORMED_ENVELOPE` → `INVALID_COMMAND_TIME` → `STALE_COMMAND` → `DUPLICATE_COMMAND` → `PERSISTENCE_UNAVAILABLE` → `UNKNOWN_PLOT` / `UNKNOWN_CROP` → `PLOT_LOCKED` → `PLOT_OCCUPIED` / `NO_CYCLE` / `CYCLE_MISMATCH` / `CROP_NOT_READY` → `LEVEL_REQUIRED` / `RESEARCH_REQUIRED` → `STALE_TERMS` → `INSUFFICIENT_COINS` → `NUMERIC_LIMIT`.
+
+This lists the implemented set (M01 build plan P11) so later commands stay consistent; it adds no gameplay rule.
+
 **Rule:** Scheduled events due at the command's simulation timestamp are processed **before** an input command at that timestamp. Rejected commands produce no authoritative partial changes. Idempotency keys prevent duplicate economic effects if the same command is retried.
 
 **Approved manual batch contract (DEC-025):** prevalidate the command envelope/capabilities, then report typed per-plot outcomes. Ineligible members are skipped without partial manual charge/state mutation; authorized eligible members execute in stable order and their accepted subset commits as one coherent outcome. Each accepted planting remains all-or-nothing. All successful BatchHarvest credits precede that command's replant costs. A wholly rejected/all-invalid command changes no gameplay state measured after independently due work. A definitely NOT_COMMITTED candidate is not published. UNKNOWN is not rejection/rollback: stop and reconcile under §20.2; never overwrite a possibly committed primary from stale memory. Partial selection is not partial persistence or permission to bypass a Locked plot.
@@ -488,6 +495,16 @@ SaveSnapshot
 ```
 
 Keep scene and GPU objects out of persistent schema. An immutable supported content/progression manifest reference is required; pure schema migration preserves its binding and all paid snapshots. Incompatible content mappings require separate approval; missing/unsupported manifests are recoverable no-overwrite errors (§20.3).
+
+**M01 implementation note — 2026-10-30 (non-normative):** M01 selected a canonical primitive codec for state digests and in-memory snapshots:
+
+- **Accepted values:** null, bool, int, String, Array, and Dictionary with String keys.
+- **Encoding:** type tags, integers as exact decimal, length-prefixed UTF-8 strings, dictionary keys in sorted order.
+- **Rejected values:** floats, objects and packed arrays.
+- **Digests:** SHA-256 of the encoded bytes, with separate gameplay and durable/clock-metadata projections (§20.2).
+- **Godot `JSON`:** excluded for authoritative state, because it converts integers to floats and would corrupt int64 values.
+
+This is the M01 in-memory and digest format, not an approved durable schema version. M03 decides the durable encoding and its migrations.
 
 The Group 1 fields above are logical contracts, not an implemented schema version or selected serialization codec. Validate/deep-copy them with the rest of state. Raw clock intervals and processed-command detail must not grow without bound; preserve reconciliation/replay guarantees when compacting. Subsequent G4 clauses now define settings ownership and statistics windows explicitly; other unconfirmed decisions remain separate.
 

@@ -162,4 +162,4 @@ Fixture rules:
 | Rendering, UI, audio and the T-002 music/render assertions; export with templates | M04 |
 | Contracts (incl. AV-001-02), statistics, final balance | M05 |
 | Hardware qualification (DEC-023), release export, performance | M06 |
-| DEC-001 closure entry and D-record synchronization into existing docs | Owner approval: see [M01_Proposed_Doc_Changes.md](M01_Proposed_Doc_Changes.md) |
+| DEC-001 verification entry and D-record synchronization into existing docs | **Applied 2026-10-30** with owner approval: see [M01_Proposed_Doc_Changes.md](M01_Proposed_Doc_Changes.md) |

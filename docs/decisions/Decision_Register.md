@@ -57,7 +57,7 @@ Present architectural and foundational choices first; explain dependencies and a
 
 | Decision | RM ID | Subject | Importance | Earliest binding deadline | Status | Section |
 |---|---|---|---|---|---|---|
-| DEC-001 | D-01 | Toolchain, runner and SQLite integration | Critical | M01 artifact verification; SQLite before M03 | Open (names/target Approved; artifact/adoption verification pending) | 1 |
+| DEC-001 | D-01 | Toolchain, runner and SQLite integration | Critical | M01 artifact verification; SQLite before M03 | Open (names/target Approved; editor/templates/GUT artifacts Verified 2026-10-30; SQLite and export verification pending) | 1 |
 | DEC-002 | D-02 | Through30 curve and increasing continuation | High | M01 curve; M03/M06 long-offline validation | Approved (development values provisional) | 1 |
 | DEC-003 | D-03 | Initial coins and new-game state | Medium | M01 | Approved | 1 |
 | DEC-004 | D-04 | Skill rank costs and prerequisite graph | High | M02 | Approved | 2 |
@@ -119,6 +119,18 @@ No circular approval dependency is required: decide the envelope/interface first
 **Approval record:** Approved by project owner on **2026-10-26**, confirmation **“Approve Group 1.”** Selected **option A policy**: standard stable non-.NET Godot/matching templates, Compatibility baseline, GUT direction plus scenario harnesses, and evaluate isolated `2shady4u/godot-sqlite` first with required checks. Exact engine/templates/GUT/addon/native-library versions, checksums, license review and empirical integration are **not approved or verified**; parent status remains Open. **Source synchronization: complete for approved policy**, per the Group 1 inventory; implementation/evidence remains future work.
 
 **C1 approval — named versions/target:** Owner on **2026-10-27**, confirmation **“DEC-001 - approved, DEC-002 - use option B.”** Select standard non-.NET Godot **4.7.2-stable**, matching standard **4.7.2-stable export templates**, **GUT v9.7.1**, evaluate **godot-sqlite v4.9** (reported bundled SQLite **3.51.0**), Compatibility and initial Windows **x86_64**. **Source synchronization: complete for selected names/target.** Parent remains Open only for actual artifact/full-commit/checksum/license inventory and native adoption/integration verification; these facts were not produced by a planning approval. No re-selection of the named baseline is required.
+
+**M01-T01 artifact verification — 2026-10-30:** The project owner authorized acquisition and verification ("Yes, download all", 2026-10-29) and this record ("apply all 8 proposed changes", 2026-10-30). Verified against the C1 names, with no version substituted:
+
+- **Editor:** `Godot_v4.7.2-stable_win64.exe.zip` SHA-256 `731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953`; its SHA-512 matches the publisher `SHA512-SUMS.txt`. The extracted editor and console binaries have valid Authenticode signatures (Prehensile Tales B.V.). The editor reports `4.7.2.stable.official.ed1daf0bf`, matching tag `4.7.2-stable` commit `ed1daf0bf001b61586d9930840f2f1394092c079`.
+- **Export templates:** `Godot_v4.7.2-stable_export_templates.tpz` SHA-256 `f298490b8d44d934be425a5a65a51bf15f422428b229a06a6e11d9ffea248011`; its SHA-512 matches the publisher manifest; `version.txt` = `4.7.2.stable`. The Windows x86_64 templates are inventoried with hashes; they are not installed and export is not exercised.
+- **GUT v9.7.1:** tag commit `aeb5d4f3f7f0a6c9b5e178876d6c99b791fda605`, archive SHA-256 `14969aa46adc84aa08cdd21b9f6d1a64addd92ae60b36f02d0521ed305aa4086`, MIT license.
+- **Licenses:** the engine license and third-party notice inventory are recorded.
+- **Headless runner:** an empty suite, a passing suite and a deliberate failure exit as verified. The project runner adds zero-test, script-error and leak guards.
+
+Evidence: [T01_Toolchain_Evidence.md](../../artifacts/M01/T01_Toolchain_Evidence.md) and [S0 evidence](../../artifacts/M01/evidence/S0/S0_Evidence.md).
+
+**Subpart status:** artifact verification for the editor, the templates (package level) and GUT is **Verified**. The parent remains **Open** for godot-sqlite v4.9 native qualification (M03-T01) and an actual Windows export (M04/M06). Register counts are unchanged.
 
 **Issue and why now:** C1 selects the editor/template/test/addon-evaluation versions and x86_64 target; exact artifact identity/fingerprint and adoption checks still remain. Typed APIs and export compatibility vary by release. The named SQLitev4.9 evaluation is approved, but no downloaded native artifact is verified or installed. A framework choice must not leak presentation/native dependencies into the core.
 
