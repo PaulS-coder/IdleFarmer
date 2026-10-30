@@ -93,7 +93,8 @@ IdleFarmer/                              (repo root)
 2. Run `--headless --path idle_farmer --import`.
 3. Run `--headless --path idle_farmer -s addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`. An optional `-Dir` or `-Test` parameter forwards `-gdir`/`-gselect`.
 4. Copy the log and JUnit XML to `artifacts/M01/test_runs/<UTC timestamp>/`.
-5. Parse the JUnit XML. If it shows zero tests, exit 2. Otherwise return GUT's exit code.
+5. Scan the import and test logs for script load/parse errors and exit 5 if any are found. GUT skips such files and exits 0 (found in S0).
+6. Parse the JUnit XML. If it shows zero tests, exit 2. Otherwise return GUT's exit code.
 
 S0 exit evidence:
 
@@ -382,3 +383,4 @@ Each slice ends with all suites green through `tools/run_tests.ps1`, evidence in
 | Date | Change |
 |---|---|
 | 2026-10-29 | Initial version from approved P1–P13 and I1–I3. Oracle vectors recomputed independently in Python; they match FRS §5.1.1 and TRS §5. |
+| 2026-10-30 | S0: added a runner script-error guard (exit 5), because GUT silently skips unparsable test scripts. `--import` does not parse scripts, so S5's dependency audit must load every core script. See `artifacts/M01/evidence/S0/S0_Evidence.md`. |
