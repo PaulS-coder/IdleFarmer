@@ -83,14 +83,16 @@ func pending_in_order() -> Array[ScheduledEvent]:
 	return ordered
 
 
-## Reconstructs the pending queue from authoritative state: one maturity event per growing cycle.
-## Research completion events are added here when M02 introduces running research.
+## Reconstructs the pending queue from authoritative state: one maturity event per growing cycle
+## and the active research run's completion (M02 E7), with their original keys.
 static func rebuild(state: GameState) -> EventScheduler:
 	var scheduler: EventScheduler = EventScheduler.new()
 	for plot: PlotState in state.plots:
 		var cycle: CropCycle = plot.crop_cycle
 		if cycle != null and cycle.status == CropCycle.STATUS_GROWING:
 			scheduler.push(ScheduledEvent.for_maturity(cycle))
+	if state.research.is_active():
+		scheduler.push(ResearchSystem.completion_event(state.research))
 	return scheduler
 
 

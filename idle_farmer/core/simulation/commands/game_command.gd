@@ -10,6 +10,8 @@ const TYPE_PURCHASE_PLOT: String = "PurchasePlot"
 const TYPE_ALLOCATE_SKILL: String = "AllocateSkill"
 const TYPE_RESET_SKILLS: String = "ResetSkills"
 const TYPE_PURCHASE_UPGRADE: String = "PurchaseUpgrade"
+const TYPE_START_RESEARCH: String = "StartResearch"
+const TYPE_ACCELERATE_RESEARCH: String = "AccelerateResearch"
 
 var _command_id: CommandId
 var _type: String

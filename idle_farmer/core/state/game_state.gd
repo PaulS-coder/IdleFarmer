@@ -29,7 +29,7 @@ var simulation_time_us: int = 0
 var player: PlayerState = PlayerState.new()
 var plots: Array[PlotState] = []
 var upgrades: ExtensionState.Upgrades = ExtensionState.Upgrades.new()
-var research: ExtensionState.Research = ExtensionState.Research.new()
+var research: ResearchState = ResearchState.new()
 var contracts: ExtensionState.Contracts = ExtensionState.Contracts.new()
 var automation: ExtensionState.Automation = ExtensionState.Automation.new()
 var statistics: ExtensionState.Statistics = ExtensionState.Statistics.new()
@@ -207,8 +207,23 @@ func _validate_research(registry: ContentRegistry) -> PackedStringArray:
 	for research_id: String in research.completed:
 		if registry.research(research_id) == null:
 			errors.append("RESEARCH_UNKNOWN: '%s'" % research_id)
-	if not research.active_project_id.is_empty() and registry.research(research.active_project_id) == null:
+	if not research.is_active():
+		return errors
+	if registry.research(research.active_project_id) == null:
 		errors.append("RESEARCH_UNKNOWN: active '%s'" % research.active_project_id)
+	var run: EntityId = research.active_run_id
+	if run != null and (run.save_id != save_id or run.counter >= next_entity_id):
+		errors.append("RESEARCH_RUN_ID_FOREIGN: %s not allocated by this save" % run.key())
+	if research.active_insertion_seq >= next_insertion_sequence:
+		errors.append("RESEARCH_INSERTION_SEQ_INVALID: seq %d" % research.active_insertion_seq)
+	for p: PlotState in plots:
+		if p.crop_cycle != null and p.crop_cycle.maturity_insertion_seq == research.active_insertion_seq:
+			errors.append("RESEARCH_INSERTION_SEQ_INVALID: seq %d shared with plot %d" % [research.active_insertion_seq, p.plot_id])
+	if research.active_started_us > simulation_time_us:
+		errors.append("RESEARCH_STARTED_IN_FUTURE: '%s'" % research.active_project_id)
+	if research.active_completes_us <= simulation_time_us:
+		errors.append("RESEARCH_OVERDUE: '%s' completes at %d but is still active at %d" % [research.active_project_id,
+			research.active_completes_us, simulation_time_us])
 	return errors
 
 
@@ -290,7 +305,7 @@ static func from_primitive(value: Variant) -> GameState:
 	state.next_insertion_sequence = reader.int_field("next_insertion_sequence")
 	state.player = PlayerState.from_primitive(reader.dict_field("player"))
 	state.upgrades = ExtensionState.Upgrades.from_primitive(reader.dict_field("upgrades"))
-	state.research = ExtensionState.Research.from_primitive(reader.dict_field("research"))
+	state.research = ResearchState.from_primitive(reader.dict_field("research"))
 	state.contracts = ExtensionState.Contracts.from_primitive(reader.dict_field("contracts"))
 	state.automation = ExtensionState.Automation.from_primitive(reader.dict_field("automation"))
 	state.statistics = ExtensionState.Statistics.from_primitive(reader.dict_field("statistics"))

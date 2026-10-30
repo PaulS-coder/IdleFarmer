@@ -29,52 +29,6 @@ class Upgrades:
 		return record if reader.ok() else null
 
 
-## Research progress (DEC-007; flow is M02). Wheat is a start unlock and is never listed here.
-class Research:
-	extends RefCounted
-
-	var completed: PackedStringArray = PackedStringArray()
-	var active_project_id: String = ""
-	var active_paid_cost: int = 0
-	var active_started_us: int = 0
-	var active_completes_us: int = 0
-	var boost_used: bool = false
-
-	func validate() -> PackedStringArray:
-		var errors: PackedStringArray = PackedStringArray()
-		if active_paid_cost < 0 or active_started_us < 0 or active_completes_us < 0:
-			errors.append("RESEARCH_STATE_NEGATIVE: research fields must be nonnegative")
-		if active_project_id.is_empty() and (active_paid_cost != 0 or active_completes_us != 0 or boost_used):
-			errors.append("RESEARCH_STATE_INCONSISTENT: inactive research carries active fields")
-		var sorted: PackedStringArray = completed.duplicate()
-		sorted.sort()
-		if sorted != completed:
-			errors.append("RESEARCH_COMPLETED_UNSORTED: completed IDs must be sorted")
-		return errors
-
-	func to_primitive() -> Dictionary:
-		return {
-			"completed": Array(completed),
-			"active_project_id": active_project_id,
-			"active_paid_cost": active_paid_cost,
-			"active_started_us": active_started_us,
-			"active_completes_us": active_completes_us,
-			"boost_used": boost_used,
-		}
-
-	static func from_primitive(value: Variant) -> Research:
-		var reader: PrimitiveReader = PrimitiveReader.new(value, "Research")
-		reader.expect_only(PackedStringArray(["completed", "active_project_id", "active_paid_cost", "active_started_us", "active_completes_us", "boost_used"]))
-		var record: Research = Research.new()
-		record.completed = reader.string_array_field("completed")
-		record.active_project_id = reader.string_field("active_project_id")
-		record.active_paid_cost = reader.int_field("active_paid_cost")
-		record.active_started_us = reader.int_field("active_started_us")
-		record.active_completes_us = reader.int_field("active_completes_us")
-		record.boost_used = reader.bool_field("boost_used")
-		return record if reader.ok() else null
-
-
 ## Contract offers/instances/claims (DEC-019/C2; behavior is M05). Instances are primitive records.
 class Contracts:
 	extends RefCounted

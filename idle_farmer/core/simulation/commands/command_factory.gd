@@ -21,9 +21,14 @@ static func build(type: String, id: CommandId, accepted_time_us: int, accepted_o
 			return ResetSkillsCommand.from_args(id, accepted_time_us, accepted_order, terms)
 		GameCommand.TYPE_PURCHASE_UPGRADE:
 			return PurchaseUpgradeCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_START_RESEARCH:
+			return StartResearchCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_ACCELERATE_RESEARCH:
+			return AccelerateResearchCommand.from_args(id, accepted_time_us, accepted_order, terms)
 	return null
 
 
 static func is_known(type: String) -> bool:
 	return type in [GameCommand.TYPE_PLANT_CROP, GameCommand.TYPE_HARVEST_CROP, GameCommand.TYPE_PURCHASE_PLOT,
-		GameCommand.TYPE_ALLOCATE_SKILL, GameCommand.TYPE_RESET_SKILLS, GameCommand.TYPE_PURCHASE_UPGRADE]
+		GameCommand.TYPE_ALLOCATE_SKILL, GameCommand.TYPE_RESET_SKILLS, GameCommand.TYPE_PURCHASE_UPGRADE,
+		GameCommand.TYPE_START_RESEARCH, GameCommand.TYPE_ACCELERATE_RESEARCH]

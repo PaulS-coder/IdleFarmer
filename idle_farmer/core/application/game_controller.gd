@@ -130,6 +130,20 @@ func quote_reset() -> Dictionary:
 	return SkillSystem.quote_reset(_committed, _registry())
 
 
+func quote_research(project_id: String) -> Dictionary:
+	return ResearchSystem.quote_start(_registry(), project_id)
+
+
+## Boost terms (run, fixed charge, rule) and the exact preview labelled with its as-of time
+## (AV-004-03); the accepted-time result is returned by the command itself.
+func quote_research_boost() -> Dictionary:
+	return ResearchSystem.quote_boost(_committed)
+
+
+func preview_research_boost() -> Dictionary:
+	return ResearchSystem.preview_boost(_committed)
+
+
 func capabilities() -> Capabilities:
 	return Capabilities.of(_committed, _registry())
 

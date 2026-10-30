@@ -153,6 +153,59 @@ def modifier_cases(rng):
     return cases
 
 
+# Independent transcription of FRS §8 (research) for the T07 oracle: crop -> (level, coins, minutes).
+RESEARCH = {
+    "carrots": (2, 150, 8), "corn": (4, 800, 20), "tomatoes": (7, 2800, 45), "pumpkins": (10, 9000, 120),
+    "sunflowers": (12, 10000, 60), "strawberries": (12, 12000, 45), "blueberries": (15, 24000, 90),
+    "soybeans": (15, 26000, 60), "grapes": (18, 55000, 120), "coffee": (18, 55000, 120),
+    "cotton": (22, 120000, 180), "rice": (22, 110000, 150), "vanilla": (26, 300000, 300), "saffron": (26, 250000, 240),
+}
+
+
+def boost(remaining):
+    """DEC-007: new remaining = ceil(remaining/2); None when it saves no time."""
+    halved = ceil_div(remaining, 2)
+    return None if halved >= remaining else halved
+
+
+def research_rows():
+    rows = []
+    for crop in sorted(RESEARCH):
+        level, cost, minutes = RESEARCH[crop]
+        duration = minutes * 60_000_000
+        rows.append(["unlock_" + crop, crop, level, cost, duration, ceil_div(cost, 2), boost(duration)])
+    return rows
+
+
+def boost_rows(rng):
+    minute = 60_000_000
+    cases = [20 * minute, 10 * minute, 2, 1, 3, 4, 5, 7, 999_999, INT64_MAX]
+    cases += [rng.randint(2, 10**12) for _ in range(20)]
+    return [[r, -1 if boost(r) is None else boost(r), 0 if boost(r) is None else r - boost(r)] for r in cases]
+
+
+def charge_rows():
+    """ceil(C/2) for paid snapshots. Every FRS §8 cost is even, so odd costs (a repriced or migrated
+    snapshot) are the only vectors that separate ceil from floor."""
+    return [[c, ceil_div(c, 2)] for c in (0, 1, 2, 3, 599, 601, 799, 801, 150_001, INT64_MAX)]
+
+
+def accepted_time_rows(rng):
+    """AV-004-03: the preview ages; the accepted-time result halves what remains at acceptance.
+    [project, quote elapsed_us, accept elapsed_us, expected completion offset from start or -1]."""
+    rows = []
+    for crop in ("carrots", "corn", "tomatoes", "vanilla"):
+        duration = RESEARCH[crop][2] * 60_000_000
+        for _ in range(3):
+            quote_at = rng.randint(0, duration - 2)
+            accept_at = rng.randint(quote_at, duration - 1)
+            halved = boost(duration - accept_at)
+            rows.append(["unlock_" + crop, quote_at, accept_at, -1 if halved is None else accept_at + halved])
+        rows.append(["unlock_" + crop, duration - 2, duration - 1, -1])  # preview saved 1 us; at acceptance none
+        rows.append(["unlock_" + crop, 0, duration - 2, duration - 1])
+    return rows
+
+
 def gd(v):
     if isinstance(v, str):
         return '"' + v + '"'
@@ -193,6 +246,22 @@ def main() -> None:
     for crop in sorted(CROPS):
         for fert in sorted(FERTILIZERS):
             lines.append("	" + gd([crop, fert, fert_price(fert, CROPS[crop][2])]) + ",")
+    lines.append("]")
+    research_rng = random.Random(SEED + 7)  # separate stream: earlier vectors stay byte-identical
+    lines += ["", "## [project_id, crop, required level, cost, duration_us, boost charge ceil(C/2),",
+              "##  remaining after a boost at start ceil(D/2)] (FRS §8, DEC-007).", "const RESEARCH: Array[Array] = ["]
+    for row in research_rows():
+        lines.append("	" + gd(row) + ",")
+    lines += ["]", "", "## [remaining_us, new remaining_us (-1 = no time saved), saved_us].", "const BOOST: Array[Array] = ["]
+    for row in boost_rows(research_rng):
+        lines.append("	" + gd(row) + ",")
+    lines += ["]", "", "## [paid cost C, boost charge ceil(C/2)].", "const BOOST_CHARGE: Array[Array] = ["]
+    for row in charge_rows():
+        lines.append("	" + gd(row) + ",")
+    lines += ["]", "", "## [project_id, quote elapsed_us, accept elapsed_us, completion offset from start (-1 = NO_TIME_SAVED)].",
+              "const BOOST_ACCEPTED: Array[Array] = ["]
+    for row in accepted_time_rows(research_rng):
+        lines.append("	" + gd(row) + ",")
     lines.append("]")
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {OUT}")

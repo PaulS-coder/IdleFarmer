@@ -117,6 +117,10 @@ func submit_command(command: GameCommand) -> CommandResult:
 			result = SkillSystem.reset(_state, _registry, command as ResetSkillsCommand)
 		GameCommand.TYPE_PURCHASE_UPGRADE:
 			result = PurchaseSystem.purchase_upgrade(_state, _registry, command as PurchaseUpgradeCommand)
+		GameCommand.TYPE_START_RESEARCH:
+			result = ResearchSystem.start(_state, _registry, _scheduler, command as StartResearchCommand)
+		GameCommand.TYPE_ACCELERATE_RESEARCH:
+			result = ResearchSystem.accelerate(_state, _scheduler, command as AccelerateResearchCommand)
 		_:
 			return CommandResult.failed(FailureCode.MALFORMED_ENVELOPE, "unsupported command type", id, _state.state_sequence)
 	if not result.success:
@@ -161,5 +165,5 @@ func _dispatch(event: ScheduledEvent) -> SimulationEvent:
 		ScheduledEvent.TYPE_CROP_MATURED:
 			return FarmSystem.mark_mature(_state, event)
 		ScheduledEvent.TYPE_RESEARCH_COMPLETED:
-			return null  # Phase 1 placeholder: research completion is implemented in M02.
+			return ResearchSystem.complete(_state, _registry, event)
 	return null
