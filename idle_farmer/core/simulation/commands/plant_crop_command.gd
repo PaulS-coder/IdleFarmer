@@ -2,7 +2,9 @@ class_name PlantCropCommand
 extends GameCommand
 ## Manual planting on one plot (FR-FARM-03–05). Carries the confirmed semantic terms the player
 ## saw (AUD-004 / TRS §20.4): crop, fertilizer, bound manifest, exact seed and fertilizer costs and
-## snapshotted growth/reward.
+## snapshotted growth/reward. M02 adds the plan terms (Q1): `fallback_accepted`, `plan_digest` (non-empty
+## only when this planting arms the plot's recurring loop) and `min_ending_balance` (≥ 0 only for a
+## direct manual reserve override; −1 otherwise).
 ## Execution recomputes these terms and rejects with STALE_TERMS if any differ — never a substitute.
 
 var _plot_id: int
@@ -14,11 +16,15 @@ var _gross_coins: int
 var _xp: int
 var _fertilizer_id: String
 var _fertilizer_cost: int
+var _fallback_accepted: bool
+var _plan_digest: String
+var _min_ending_balance: int
 
 
 func _init(p_command_id: CommandId, p_accepted_time_us: int, p_accepted_order: int, p_plot_id: int, p_crop_id: String,
 		p_manifest_id: String, p_seed_cost: int, p_growth_us: int, p_gross_coins: int, p_xp: int,
-		p_fertilizer_id: String = FertilizerDefinition.NONE_ID, p_fertilizer_cost: int = 0) -> void:
+		p_fertilizer_id: String = FertilizerDefinition.NONE_ID, p_fertilizer_cost: int = 0, p_fallback_accepted: bool = false,
+		p_plan_digest: String = "", p_min_ending_balance: int = -1) -> void:
 	super(p_command_id, GameCommand.TYPE_PLANT_CROP, p_accepted_time_us, p_accepted_order)
 	_plot_id = p_plot_id
 	_crop_id = p_crop_id
@@ -29,6 +35,9 @@ func _init(p_command_id: CommandId, p_accepted_time_us: int, p_accepted_order: i
 	_xp = p_xp
 	_fertilizer_id = p_fertilizer_id
 	_fertilizer_cost = p_fertilizer_cost
+	_fallback_accepted = p_fallback_accepted
+	_plan_digest = p_plan_digest
+	_min_ending_balance = p_min_ending_balance
 
 
 func plot_id() -> int:
@@ -67,20 +76,34 @@ func fertilizer_cost() -> int:
 	return _fertilizer_cost
 
 
+func fallback_accepted() -> bool:
+	return _fallback_accepted
+
+
+func plan_digest() -> String:
+	return _plan_digest
+
+
+func min_ending_balance() -> int:
+	return _min_ending_balance
+
+
 static func from_args(id: CommandId, time_us: int, order: int, args: Dictionary) -> PlantCropCommand:
 	var reader: PrimitiveReader = PrimitiveReader.new(args, "PlantCrop.args")
 	reader.expect_only(PackedStringArray(["plot_id", "crop_id", "manifest_id", "seed_cost", "growth_us", "gross_coins", "xp",
-		"fertilizer_id", "fertilizer_cost"]))
+		"fertilizer_id", "fertilizer_cost", "fallback_accepted", "plan_digest", "min_ending_balance"]))
 	var command: PlantCropCommand = PlantCropCommand.new(id, time_us, order, reader.int_field("plot_id"), reader.string_field("crop_id"),
 		reader.string_field("manifest_id"), reader.int_field("seed_cost"), reader.int_field("growth_us"),
 		reader.int_field("gross_coins"), reader.int_field("xp"), reader.string_field("fertilizer_id"),
-		reader.int_field("fertilizer_cost"))
+		reader.int_field("fertilizer_cost"), reader.bool_field("fallback_accepted"), reader.string_field("plan_digest"),
+		reader.int_field("min_ending_balance"))
 	return command if reader.ok() else null
 
 
 func _args_valid() -> bool:
 	return not _crop_id.is_empty() and not _manifest_id.is_empty() and _seed_cost >= 0 and _growth_us > 0 \
-		and _gross_coins >= 0 and _xp >= 0 and not _fertilizer_id.is_empty() and _fertilizer_cost >= 0
+		and _gross_coins >= 0 and _xp >= 0 and not _fertilizer_id.is_empty() and _fertilizer_cost >= 0 \
+		and _min_ending_balance >= -1
 
 
 func _args_primitive() -> Dictionary:
@@ -94,4 +117,7 @@ func _args_primitive() -> Dictionary:
 		"xp": _xp,
 		"fertilizer_id": _fertilizer_id,
 		"fertilizer_cost": _fertilizer_cost,
+		"fallback_accepted": _fallback_accepted,
+		"plan_digest": _plan_digest,
+		"min_ending_balance": _min_ending_balance,
 	}

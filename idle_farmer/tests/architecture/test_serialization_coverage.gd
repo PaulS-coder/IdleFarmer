@@ -38,6 +38,8 @@ func _records() -> Array[Object]:
 		AccountedInterval.new(AccountedInterval.KIND_ACTIVE, 1, 1), state.command_replay,
 		state.upgrades, state.research, state.contracts, state.automation, state.statistics,
 		CommandId.new("s", "e", 1), result, SimulationEvent.new(SimulationEvent.CROP_PLANTED, 0, 1, null),
+		state.automation.plot(1), state.automation.plot(1).settings, state.automation.plot(1).authorization,
+		state.automation.defaults,
 	]
 
 

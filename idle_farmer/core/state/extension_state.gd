@@ -55,52 +55,6 @@ class Contracts:
 		return record if reader.ok() else null
 
 
-## Automation configuration and farm budget (DEC-010/011/025; behavior is M02).
-## Approved budget defaults: reserve 0, Budget Protection 25%, automated-seed protection Off.
-class Automation:
-	extends RefCounted
-
-	var defaults: Dictionary = {}
-	var groups: Dictionary = {}
-	var authorizations: Dictionary = {}
-	var rotation: Dictionary = {}
-	var budget_reserve: int = 0
-	var budget_protection_percent: int = 25
-	var budget_seed_protection: bool = false
-
-	func validate() -> PackedStringArray:
-		var errors: PackedStringArray = PackedStringArray()
-		if budget_reserve < 0:
-			errors.append("BUDGET_RESERVE_NEGATIVE: %d" % budget_reserve)
-		if budget_protection_percent < 0 or budget_protection_percent > 100:
-			errors.append("BUDGET_PERCENT_RANGE: %d" % budget_protection_percent)
-		return errors
-
-	func to_primitive() -> Dictionary:
-		return {
-			"defaults": PrimitiveReader.plain(defaults),
-			"groups": PrimitiveReader.plain(groups),
-			"authorizations": PrimitiveReader.plain(authorizations),
-			"rotation": PrimitiveReader.plain(rotation),
-			"budget_reserve": budget_reserve,
-			"budget_protection_percent": budget_protection_percent,
-			"budget_seed_protection": budget_seed_protection,
-		}
-
-	static func from_primitive(value: Variant) -> Automation:
-		var reader: PrimitiveReader = PrimitiveReader.new(value, "Automation")
-		reader.expect_only(PackedStringArray(["defaults", "groups", "authorizations", "rotation", "budget_reserve", "budget_protection_percent", "budget_seed_protection"]))
-		var record: Automation = Automation.new()
-		record.defaults = reader.dict_field("defaults").duplicate(true)
-		record.groups = reader.dict_field("groups").duplicate(true)
-		record.authorizations = reader.dict_field("authorizations").duplicate(true)
-		record.rotation = reader.dict_field("rotation").duplicate(true)
-		record.budget_reserve = reader.int_field("budget_reserve")
-		record.budget_protection_percent = reader.int_field("budget_protection_percent")
-		record.budget_seed_protection = reader.bool_field("budget_seed_protection")
-		return record if reader.ok() else null
-
-
 ## Statistics buckets and accounting segments (DEC-017/018; behavior is M05).
 class Statistics:
 	extends RefCounted

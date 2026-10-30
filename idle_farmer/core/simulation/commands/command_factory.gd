@@ -25,10 +25,24 @@ static func build(type: String, id: CommandId, accepted_time_us: int, accepted_o
 			return StartResearchCommand.from_args(id, accepted_time_us, accepted_order, terms)
 		GameCommand.TYPE_ACCELERATE_RESEARCH:
 			return AccelerateResearchCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_BATCH_PLANT:
+			return BatchPlantCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_BATCH_HARVEST:
+			return BatchHarvestCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_APPLY_AND_START:
+			return ApplyAndStartCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_CONFIGURE_AUTOMATION:
+			return ConfigureAutomationCommand.from_args(id, accepted_time_us, accepted_order, terms)
+		GameCommand.TYPE_CONFIGURE_BUDGET:
+			return ConfigureBudgetCommand.from_args(id, accepted_time_us, accepted_order, terms)
+	if UnavailableCommand.TYPES.has(type):
+		return UnavailableCommand.new(id, type, accepted_time_us, accepted_order, terms)
 	return null
 
 
 static func is_known(type: String) -> bool:
 	return type in [GameCommand.TYPE_PLANT_CROP, GameCommand.TYPE_HARVEST_CROP, GameCommand.TYPE_PURCHASE_PLOT,
 		GameCommand.TYPE_ALLOCATE_SKILL, GameCommand.TYPE_RESET_SKILLS, GameCommand.TYPE_PURCHASE_UPGRADE,
-		GameCommand.TYPE_START_RESEARCH, GameCommand.TYPE_ACCELERATE_RESEARCH]
+		GameCommand.TYPE_START_RESEARCH, GameCommand.TYPE_ACCELERATE_RESEARCH, GameCommand.TYPE_BATCH_PLANT,
+		GameCommand.TYPE_BATCH_HARVEST, GameCommand.TYPE_APPLY_AND_START, GameCommand.TYPE_CONFIGURE_AUTOMATION,
+		GameCommand.TYPE_CONFIGURE_BUDGET] or UnavailableCommand.TYPES.has(type)

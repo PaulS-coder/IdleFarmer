@@ -38,7 +38,7 @@ func test_plant_wheat_from_new_game() -> void:
 	assert_null(cycle.fertilizer_transaction_id)
 	assert_eq(state.player.coins, 0, "free basic seed; no reward on planting")
 	assert_eq(state.player.total_xp, 0)
-	assert_eq(state.plot(3).selected_crop_id, "", "planting does not change selection")
+	assert_eq(state.automation.to_primitive(), AutomationState.new_default().to_primitive(), "planting does not change settings")
 	assert_eq([cycle.cycle_id.counter, cycle.planting_transaction_id.counter, cycle.maturity_insertion_seq], [1, 2, 1])
 	assert_eq(scheduler.size(), 1)
 	assert_eq(scheduler.peek_time(), 480_000_000)

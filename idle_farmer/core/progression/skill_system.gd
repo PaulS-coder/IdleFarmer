@@ -62,7 +62,8 @@ static func quote_reset(state: GameState, registry: ContentRegistry) -> Dictiona
 
 
 ## Refunds every allocated point for the quoted price. XP, level, plots, equipment, research and
-## planted snapshots are untouched. Automation loops are disarmed by the S4 authorization layer.
+## planted snapshots are untouched. Every automation loop is disarmed (E11): settings stay stored but
+## inactive, and re-buying a skill never re-arms.
 static func reset(state: GameState, registry: ContentRegistry, command: ResetSkillsCommand) -> CommandResult:
 	var failure: String = FailureCode.NONE
 	var price: MathResult = reset_price(registry, state.player.level)
@@ -87,7 +88,11 @@ static func reset(state: GameState, registry: ContentRegistry, command: ResetSki
 	state.player.coins -= price.value
 	state.player.available_skill_points = refunded.value
 	state.player.skill_ranks = {}
+	var disarmed: Array[int] = AutomationSystem.disarm_all(state)
 	var result: CommandResult = succeeded(command)
+	if not disarmed.is_empty():
+		result.events.append(SimulationEvent.new(SimulationEvent.LOOPS_DISARMED, state.simulation_time_us, 0, null,
+			{"plot_ids": disarmed}))
 	result.transactions.append(EconomicTransaction.new(tx_id, state.simulation_time_us, EconomicTransaction.TYPE_SKILL_RESET,
 		0, null, -price.value, 0, EconomicTransaction.CATEGORY_RESET, state.content_version, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.SKILLS_RESET, state.simulation_time_us, 0, null,

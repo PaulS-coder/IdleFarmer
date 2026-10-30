@@ -31,7 +31,7 @@ var plots: Array[PlotState] = []
 var upgrades: ExtensionState.Upgrades = ExtensionState.Upgrades.new()
 var research: ResearchState = ResearchState.new()
 var contracts: ExtensionState.Contracts = ExtensionState.Contracts.new()
-var automation: ExtensionState.Automation = ExtensionState.Automation.new()
+var automation: AutomationState = AutomationState.new_default()
 var statistics: ExtensionState.Statistics = ExtensionState.Statistics.new()
 var settings: GameSettings = GameSettings.new()
 var time_anchor: TimeAnchor = TimeAnchor.new()
@@ -144,6 +144,7 @@ func validate(registry: ContentRegistry) -> PackedStringArray:
 	errors.append_array(research.validate())
 	errors.append_array(contracts.validate())
 	errors.append_array(automation.validate())
+	errors.append_array(_validate_settings_content(registry))
 	errors.append_array(statistics.validate())
 	errors.append_array(settings.validate())
 	errors.append_array(time_anchor.validate())
@@ -169,8 +170,6 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 			errors.append("PLOT_UNLOCK_GAP: plot %d unlocked after a locked plot" % p.plot_id)
 		if not p.unlocked:
 			unlocked_prefix_ended = true
-		if not p.selected_crop_id.is_empty() and not registry.has_crop(p.selected_crop_id):
-			errors.append("PLOT_SELECTED_CROP_UNKNOWN: plot %d '%s'" % [p.plot_id, p.selected_crop_id])
 		var cycle: CropCycle = p.crop_cycle
 		if cycle == null or cycle.cycle_id == null:
 			continue
@@ -199,6 +198,25 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 	var unlocked: int = unlocked_plot_count()
 	if unlocked < PlotState.INITIAL_UNLOCKED:
 		errors.append("PLOT_UNLOCK_COUNT: %d unlocked, minimum %d" % [unlocked, PlotState.INITIAL_UNLOCKED])
+	return errors
+
+
+## Settings may name only content the bound manifest defines (a stored rule may still be unusable,
+## e.g. a Smart policy without the skill; that is inactive, not invalid).
+func _validate_settings_content(registry: ContentRegistry) -> PackedStringArray:
+	var errors: PackedStringArray = PackedStringArray()
+	var records: Dictionary = {"farm": automation.defaults}
+	for i: int in automation.plots.size():
+		records["plot %d" % (i + 1)] = automation.plots[i].settings
+	for group_id: String in automation.groups:
+		records["group '%s'" % group_id] = automation.groups[group_id]
+	for context: String in records:
+		var settings: FarmingSettings = records[context]
+		if settings.is_set(FarmingSettings.CROP_ID) and not settings.crop_id.is_empty() and not registry.has_crop(settings.crop_id):
+			errors.append("SETTINGS_CROP_UNKNOWN: %s '%s'" % [context, settings.crop_id])
+		if settings.is_set(FarmingSettings.FERTILIZER_POLICY) and not FarmingSettings.is_smart(settings.fertilizer_policy) \
+				and registry.fertilizer(settings.fertilizer_policy) == null:
+			errors.append("SETTINGS_POLICY_UNKNOWN: %s '%s'" % [context, settings.fertilizer_policy])
 	return errors
 
 
@@ -307,7 +325,7 @@ static func from_primitive(value: Variant) -> GameState:
 	state.upgrades = ExtensionState.Upgrades.from_primitive(reader.dict_field("upgrades"))
 	state.research = ResearchState.from_primitive(reader.dict_field("research"))
 	state.contracts = ExtensionState.Contracts.from_primitive(reader.dict_field("contracts"))
-	state.automation = ExtensionState.Automation.from_primitive(reader.dict_field("automation"))
+	state.automation = AutomationState.from_primitive(reader.dict_field("automation"))
 	state.statistics = ExtensionState.Statistics.from_primitive(reader.dict_field("statistics"))
 	state.settings = GameSettings.from_primitive(reader.dict_field("settings"))
 	state.time_anchor = TimeAnchor.from_primitive(reader.dict_field("time_anchor"))

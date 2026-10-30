@@ -15,6 +15,8 @@ var command_id: CommandId = null
 var affected_plot_ids: Array[int] = []
 var events: Array[SimulationEvent] = []
 var transactions: Array[EconomicTransaction] = []
+## Per-member outcomes of batch commands: [{plot_id, outcome ("applied"/"skipped"), failure_code}].
+var member_outcomes: Array[Dictionary] = []
 var state_sequence: int = 0
 var commit_status: String = COMMIT_NONE
 
@@ -44,6 +46,7 @@ func to_primitive() -> Dictionary:
 		"affected_plot_ids": PrimitiveReader.plain(affected_plot_ids),
 		"events": event_items,
 		"transactions": tx_items,
+		"member_outcomes": PrimitiveReader.plain(member_outcomes),
 		"state_sequence": state_sequence,
 		"commit_status": commit_status,
 	}
@@ -52,7 +55,7 @@ func to_primitive() -> Dictionary:
 static func from_primitive(value: Variant) -> CommandResult:
 	var reader: PrimitiveReader = PrimitiveReader.new(value, "CommandResult")
 	reader.expect_only(PackedStringArray(["success", "failure_code", "failure_detail", "command_id", "affected_plot_ids",
-		"events", "transactions", "state_sequence", "commit_status"]))
+		"events", "transactions", "member_outcomes", "state_sequence", "commit_status"]))
 	var result: CommandResult = CommandResult.new()
 	result.success = reader.bool_field("success")
 	result.failure_code = reader.string_field("failure_code")
@@ -79,6 +82,11 @@ static func from_primitive(value: Variant) -> CommandResult:
 			reader.absorb(PackedStringArray(["CommandResult: malformed transaction"]))
 			continue
 		result.transactions.append(tx)
+	for item: Variant in reader.array_field("member_outcomes"):
+		if typeof(item) != TYPE_DICTIONARY:
+			reader.absorb(PackedStringArray(["CommandResult: member outcomes must be dictionaries"]))
+			continue
+		result.member_outcomes.append((item as Dictionary).duplicate(true))
 	result.state_sequence = reader.int_field("state_sequence")
 	result.commit_status = reader.string_field("commit_status")
 	return result if reader.ok() else null

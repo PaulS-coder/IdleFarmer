@@ -144,6 +144,23 @@ func preview_research_boost() -> Dictionary:
 	return ResearchSystem.preview_boost(_committed)
 
 
+## Plot-bound planting quote: also carries the plan digest when the planting would arm the plot's
+## loop (Q1) and the confirmed minimum ending balance below the reserve.
+func quote_plant_on(plot_id: int, crop_id: String, fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantingQuote:
+	return FarmSystem.quote_for(_committed, _registry(), crop_id, fertilizer_id, plot_id)
+
+
+func quote_batch_plant(specs: Array[Dictionary]) -> Array[Dictionary]:
+	return AutomationSystem.quote_batch_plant(_committed, _registry(), specs)
+
+
+func quote_apply_and_start(specs: Array[Dictionary]) -> Array[Dictionary]:
+	var members: Array[Dictionary] = AutomationSystem.quote_apply_and_start(_committed, _registry(), specs)
+	for member: Dictionary in members:
+		member.erase("quote")
+	return members
+
+
 func capabilities() -> Capabilities:
 	return Capabilities.of(_committed, _registry())
 

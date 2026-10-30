@@ -19,12 +19,15 @@ func _rich_state() -> GameState:
 	s.research.completed = PackedStringArray(["unlock_carrots", "unlock_corn"])
 	Fixtures.add_cycle(s, 1, "wheat", 0)
 	Fixtures.add_cycle(s, 5, "corn", 0)
-	s.plot(9).selected_crop_id = "corn"
+	s.automation.plot(9).settings.set_value(FarmingSettings.CROP_ID, "corn")
+	s.automation.plot(9).authorization.arm("digest-9", 3)
+	s.plot(10).stall_reason = PlotState.STALL_SEED_FUNDS
 	s.upgrades.ranks = {"irrigation": 1}
 	s.contracts.instances = [{"offer_id": "Q01", "progress": {"wheat": 3}}]
 	s.contracts.claimed_offer_ids = PackedStringArray(["Q00"])
-	s.automation.defaults = {"crop": "wheat", "nested": {"list": [1, 2, 3]}}
-	s.automation.groups = {"g1": {"plots": [1, 2]}}
+	s.automation.defaults.set_value(FarmingSettings.CROP_ID, "wheat")
+	s.automation.groups = {"g1": FarmingSettings.new()}
+	s.automation.rotation = {"nested": {"list": [1, 2, 3]}}
 	s.statistics.buckets = [{"start_us": 0, "coins": 16}]
 	s.statistics.segments = [{"kind": "active", "real_us": 10}]
 	s.statistics.lifetime = {"harvests": 2}
@@ -56,14 +59,17 @@ func test_v07_mutating_every_nested_container_leaves_source_unchanged() -> void:
 		func(c: GameState) -> void: c.plots[0].crop_cycle.modifier_snapshot["coin_bonus_bp"] = 5,
 		func(c: GameState) -> void: c.plots[0].crop_cycle.cycle_id.counter = 77,
 		func(c: GameState) -> void: c.plots[4].crop_cycle = null,
-		func(c: GameState) -> void: c.plots[8].selected_crop_id = "wheat",
+		func(c: GameState) -> void: c.automation.plots[8].settings.crop_id = "wheat",
+		func(c: GameState) -> void: c.automation.plots[8].authorization.plan_digest = "x",
+		func(c: GameState) -> void: c.plots[9].stall_reason = PlotState.STALL_NONE,
 		func(c: GameState) -> void: c.plots.pop_back(),
 		func(c: GameState) -> void: c.research.completed.append("unlock_tomatoes"),
 		func(c: GameState) -> void: c.upgrades.ranks["irrigation"] = 2,
 		func(c: GameState) -> void: c.contracts.instances[0]["progress"]["wheat"] = 4,
 		func(c: GameState) -> void: c.contracts.claimed_offer_ids.append("Q09"),
-		func(c: GameState) -> void: c.automation.defaults["nested"]["list"].append(4),
-		func(c: GameState) -> void: c.automation.groups["g1"]["plots"][0] = 9,
+		func(c: GameState) -> void: c.automation.defaults.auto_harvest = true,
+		func(c: GameState) -> void: c.automation.groups["g1"].set_value(FarmingSettings.AUTO_REPLANT, true),
+		func(c: GameState) -> void: c.automation.rotation["nested"]["list"].append(4),
 		func(c: GameState) -> void: c.statistics.buckets[0]["coins"] = 0,
 		func(c: GameState) -> void: c.statistics.segments.clear(),
 		func(c: GameState) -> void: c.statistics.lifetime["harvests"] = 5,

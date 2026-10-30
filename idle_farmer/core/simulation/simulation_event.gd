@@ -14,6 +14,10 @@ const PLOT_PURCHASED: String = "PlotPurchased"
 const SKILL_ALLOCATED: String = "SkillAllocated"
 const SKILLS_RESET: String = "SkillsReset"
 const UPGRADE_PURCHASED: String = "UpgradePurchased"
+const PLOT_STALLED: String = "PlotStalled"
+const SETTINGS_CHANGED: String = "SettingsChanged"
+const LOOP_ARMED: String = "LoopArmed"
+const LOOPS_DISARMED: String = "LoopsDisarmed"
 
 var type: String
 var time_us: int

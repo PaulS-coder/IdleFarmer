@@ -206,7 +206,87 @@ def accepted_time_rows(rng):
     return rows
 
 
+def allocate(wallet, reserve, percent, seed_protection, candidates):
+    """FRS §7.1 / FR-AUD-005 seed-first allocation with fixed-fertilizer exclusion and replan,
+    written from the specification text (not from the GDScript).
+    candidate = (plot, priority, seed, price, fixed, fallback)."""
+    order = sorted(candidates, key=lambda c: (-c[1], c[0]))
+    excluded = []
+    passes = 0
+    while True:
+        passes += 1
+        funded, seed_stalled, spent = [], [], 0
+        for c in order:
+            if c[0] in excluded:
+                continue
+            cap = max(0, wallet - reserve) if seed_protection and c[2] > 0 else wallet
+            if spent + c[2] <= cap:
+                spent += c[2]
+                funded.append(c)
+            else:
+                seed_stalled.append(c[0])
+        avail = max(0, wallet - spent - reserve)
+        fixed_spend, plan, failed = 0, [], None
+        for c in funded:
+            if not c[4]:
+                plan.append([c[0], 0, False])
+            elif fixed_spend + c[3] <= avail:
+                fixed_spend += c[3]
+                plan.append([c[0], c[3], False])
+            elif c[5]:
+                plan.append([c[0], 0, True])
+            else:
+                failed = c[0]
+                break
+        if failed is None:
+            break
+        excluded.append(failed)
+    assert len(excluded) <= len(candidates) and passes <= len(candidates) + 1
+    stalls = sorted([[pid, "seed_funds"] for pid in seed_stalled] + [[pid, "fertilizer_funds"] for pid in excluded])
+    m = avail - fixed_spend
+    return plan, stalls, spent, avail, fixed_spend, m, m * percent // 100, passes, len(excluded)
+
+
+def allocator_cases(rng):
+    corn = 18
+    cases = [
+        # AV-005-01: plot 1 Corn+Premium(75) no fallback, plot 2 Corn+None; W=100, R=0.
+        ("av005_01", 100, 0, 25, False, [(1, 0, corn, 75, True, False), (2, 0, corn, 0, False, False)]),
+        # AV-005-01 with fallback accepted: plot 1 plants Corn with None.
+        ("av005_01_fallback", 100, 0, 25, False, [(1, 0, corn, 75, True, True), (2, 0, corn, 0, False, False)]),
+        # AV-005-03: Corn+Basic(20), Corn+Premium(75), Corn+None; W=100.
+        ("av005_03", 100, 0, 25, False, [(1, 0, corn, 20, True, False), (2, 0, corn, 75, True, False), (3, 0, corn, 0, False, False)]),
+        # DVS-008: W=1000, S=200, R=100, F=100 -> A=700, M=600, C=150 at 25%.
+        ("dvs008", 1000, 100, 25, False, [(1, 0, 120, 100, True, False), (2, 0, 80, 0, False, False)]),
+        # V04: R >= W: seeds still fundable, no optional spend.
+        ("reserve_above_wallet", 50, 500, 25, False, [(1, 0, 18, 20, True, True), (2, 0, 0, 0, False, False)]),
+        # AV-005-04: seed protection (fixture): paid seeds fit max(0, W-R); free seeds always fund.
+        ("seed_protection", 100, 70, 25, True, [(1, 0, 18, 0, False, False), (2, 0, 18, 0, False, False), (3, 0, 0, 0, False, False)]),
+        # B6: an unaffordable seed is skipped and a later cheaper one is still funded.
+        ("skip_unaffordable_seed", 60, 0, 25, False, [(1, 0, 55, 0, False, False), (2, 0, 10, 0, False, False), (3, 0, 5, 0, False, False)]),
+        # Exact wallet exhaustion.
+        ("exact_exhaustion", 54, 0, 25, False, [(1, 0, 18, 0, False, False), (2, 0, 18, 0, False, False), (3, 0, 18, 0, False, False)]),
+        # Priorities (fixture-only, Q3): higher priority is funded first.
+        ("priority_order", 40, 0, 25, False, [(1, 0, 18, 0, False, False), (2, 5, 18, 0, False, False), (3, 0, 18, 0, False, False)]),
+        # Cascading exclusions: each exclusion frees seed money that makes a later candidate fundable.
+        ("cascade", 120, 0, 25, False, [(1, 0, 30, 60, True, False), (2, 0, 30, 50, True, False), (3, 0, 30, 40, True, False),
+                                         (4, 0, 30, 0, False, False), (5, 0, 30, 0, False, False)]),
+    ]
+    for n in range(40):
+        count = rng.randint(1, 10)
+        candidates = []
+        for pid in range(1, count + 1):
+            fixed = rng.random() < 0.6
+            candidates.append((pid, rng.choice([0, 0, 0, 1]) if n % 3 == 0 else 0, rng.choice([0, 18, 55, 185, 300, rng.randint(0, 400)]),
+                               rng.choice([20, 41, 75, 95, 240, rng.randint(0, 500)]) if fixed else 0, fixed, rng.random() < 0.3))
+        cases.append(("random_%02d" % n, rng.randint(0, 2500), rng.choice([0, 0, 50, 300]), rng.choice([0, 25, 50, 100]),
+                      n % 7 == 0, candidates))
+    return cases
+
+
 def gd(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
     if isinstance(v, str):
         return '"' + v + '"'
     if isinstance(v, (list, tuple)):
@@ -262,6 +342,15 @@ def main() -> None:
               "const BOOST_ACCEPTED: Array[Array] = ["]
     for row in accepted_time_rows(research_rng):
         lines.append("	" + gd(row) + ",")
+    lines.append("]")
+    alloc_rng = random.Random(SEED + 11)  # separate stream: earlier vectors stay byte-identical
+    lines += ["", "## [name, W, R, percent, seed_protection, candidates [[plot, priority, seed, price, fixed, fallback]],",
+              "##  funded [[plot, fertilizer price paid, fallback_used]] in allocation order, stalls [[plot, reason]],",
+              "##  S, A, F, M, C, passes, exclusions] (FRS §7.1, FR-AUD-005, AV-005-01-04, DVS-008).",
+              "const ALLOCATOR: Array[Array] = ["]
+    for name, w, r, pct, prot, cands in allocator_cases(alloc_rng):
+        plan, stalls, s_, a_, f_, m_, c_, passes, excl = allocate(w, r, pct, prot, cands)
+        lines.append("\t" + gd([name, w, r, pct, prot, [list(c) for c in cands], plan, stalls, s_, a_, f_, m_, c_, passes, excl]) + ",")
     lines.append("]")
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {OUT}")

@@ -27,6 +27,9 @@ static func plant(p_intent_id: String, plot_id: int, quote: PlantingQuote) -> Ra
 		"xp": quote.xp,
 		"fertilizer_id": quote.fertilizer_id,
 		"fertilizer_cost": quote.fertilizer_cost,
+		"fallback_accepted": quote.fallback_accepted,
+		"plan_digest": quote.plan_digest,
+		"min_ending_balance": quote.min_ending_balance,
 	})
 
 

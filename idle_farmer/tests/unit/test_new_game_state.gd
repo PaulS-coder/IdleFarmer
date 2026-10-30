@@ -21,7 +21,9 @@ func test_v01_plots_ids_and_unlocks() -> void:
 		assert_eq(p.plot_id, i + 1, "unique ordered ID")
 		assert_eq(p.unlocked, p.plot_id <= 24, "plot %d unlock state" % p.plot_id)
 		assert_null(p.crop_cycle, "plot %d has no cycle" % p.plot_id)
-		assert_eq(p.selected_crop_id, "", "no crop preselected")
+		assert_eq(SettingsResolver.effective(state, p.plot_id).crop_id, "", "no crop preselected")
+		assert_false(state.automation.plot(p.plot_id).authorization.armed, "no loop armed")
+		assert_eq(p.stall_reason, PlotState.STALL_NONE)
 	assert_eq(state.unlocked_plot_count(), 24)
 
 

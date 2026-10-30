@@ -12,6 +12,11 @@ const TYPE_RESET_SKILLS: String = "ResetSkills"
 const TYPE_PURCHASE_UPGRADE: String = "PurchaseUpgrade"
 const TYPE_START_RESEARCH: String = "StartResearch"
 const TYPE_ACCELERATE_RESEARCH: String = "AccelerateResearch"
+const TYPE_BATCH_PLANT: String = "BatchPlant"
+const TYPE_BATCH_HARVEST: String = "BatchHarvest"
+const TYPE_APPLY_AND_START: String = "ApplyAndStart"
+const TYPE_CONFIGURE_AUTOMATION: String = "ConfigureAutomation"
+const TYPE_CONFIGURE_BUDGET: String = "ConfigureBudget"
 
 var _command_id: CommandId
 var _type: String
@@ -75,6 +80,18 @@ static func from_primitive(value: Variant) -> GameCommand:
 	if not reader.ok() or id == null:
 		return null
 	return CommandFactory.build(command_type, id, time_us, order, args)
+
+
+## True when `members` (commands exposing plot_id()) is non-empty, within `max_members` and has
+## no repeated plot (batch envelopes, M02-T08).
+static func unique_member_plots(members: Array, max_members: int) -> bool:
+	var seen: Dictionary[int, bool] = {}
+	for member: Variant in members:
+		var plot_id: int = member.plot_id()
+		if seen.has(plot_id):
+			return false
+		seen[plot_id] = true
+	return not members.is_empty() and members.size() <= max_members
 
 
 func _args_valid() -> bool:
