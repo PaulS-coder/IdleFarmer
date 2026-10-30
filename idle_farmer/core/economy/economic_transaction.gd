@@ -1,12 +1,48 @@
 class_name EconomicTransaction
 extends RefCounted
 ## Immutable record of one coin/XP movement (TRS §3.5). Fields are private and set once.
+## `cycle_id` is null for movements not tied to a crop cycle (research, upgrades, plots, reset —
+## M02). `origin` records whether the player, automation or the system caused it (M02 E13).
+## Each type belongs to exactly one accounting category (TRS §10, M02-T16); decoding rejects a
+## mismatched category, a wrong-signed coin delta or a cycle reference on a non-cycle type.
 
 const TYPE_SEED_PURCHASE: String = "seed_purchase"
 const TYPE_HARVEST_CREDIT: String = "harvest_credit"
+const TYPE_FERTILIZER_PURCHASE: String = "fertilizer_purchase"
+const TYPE_PLOT_PURCHASE: String = "plot_purchase"
+const TYPE_UPGRADE_PURCHASE: String = "upgrade_purchase"
+const TYPE_SKILL_RESET: String = "skill_reset"
+const TYPE_RESEARCH_PURCHASE: String = "research_purchase"
+const TYPE_RESEARCH_BOOST: String = "research_boost"
 
 const CATEGORY_SEEDS: String = "seeds"
 const CATEGORY_HARVEST: String = "harvest"
+const CATEGORY_FERTILIZER: String = "fertilizer"
+const CATEGORY_EXPANSION: String = "expansion"
+const CATEGORY_EQUIPMENT: String = "equipment"
+const CATEGORY_RESET: String = "reset"
+const CATEGORY_RESEARCH: String = "research"
+## Reserved for M05 contract claims: a separate cash-flow/XP category, never harvest gross (C2).
+const TYPE_CONTRACT_CLAIM: String = "contract_claim"
+const CATEGORY_CONTRACTS: String = "contracts"
+
+## type → [category, coin-delta sign (+1 credit, −1 debit), tied to a crop cycle].
+const TYPE_RULES: Dictionary = {
+	TYPE_SEED_PURCHASE: [CATEGORY_SEEDS, -1, true],
+	TYPE_FERTILIZER_PURCHASE: [CATEGORY_FERTILIZER, -1, true],
+	TYPE_HARVEST_CREDIT: [CATEGORY_HARVEST, 1, true],
+	TYPE_PLOT_PURCHASE: [CATEGORY_EXPANSION, -1, false],
+	TYPE_UPGRADE_PURCHASE: [CATEGORY_EQUIPMENT, -1, false],
+	TYPE_SKILL_RESET: [CATEGORY_RESET, -1, false],
+	TYPE_RESEARCH_PURCHASE: [CATEGORY_RESEARCH, -1, false],
+	TYPE_RESEARCH_BOOST: [CATEGORY_RESEARCH, -1, false],
+	TYPE_CONTRACT_CLAIM: [CATEGORY_CONTRACTS, 1, false],
+}
+
+const ORIGIN_MANUAL: String = "manual"
+const ORIGIN_AUTOMATIC: String = "automatic"
+const ORIGIN_SYSTEM: String = "system"
+const ORIGINS: PackedStringArray = ["manual", "automatic", "system"]
 
 var _transaction_id: EntityId
 var _time_us: int
@@ -17,10 +53,11 @@ var _coin_delta: int
 var _xp_delta: int
 var _category: String
 var _content_version: String
+var _origin: String
 
 
 func _init(p_transaction_id: EntityId, p_time_us: int, p_type: String, p_plot_id: int, p_cycle_id: EntityId,
-		p_coin_delta: int, p_xp_delta: int, p_category: String, p_content_version: String) -> void:
+		p_coin_delta: int, p_xp_delta: int, p_category: String, p_content_version: String, p_origin: String) -> void:
 	_transaction_id = p_transaction_id
 	_time_us = p_time_us
 	_type = p_type
@@ -30,6 +67,7 @@ func _init(p_transaction_id: EntityId, p_time_us: int, p_type: String, p_plot_id
 	_xp_delta = p_xp_delta
 	_category = p_category
 	_content_version = p_content_version
+	_origin = p_origin
 
 
 func transaction_id() -> EntityId:
@@ -68,6 +106,10 @@ func content_version() -> String:
 	return _content_version
 
 
+func origin() -> String:
+	return _origin
+
+
 func to_primitive() -> Dictionary:
 	return {
 		"transaction_id": EntityId.nullable_to_primitive(_transaction_id),
@@ -79,17 +121,31 @@ func to_primitive() -> Dictionary:
 		"xp_delta": _xp_delta,
 		"category": _category,
 		"content_version": _content_version,
+		"origin": _origin,
 	}
+
+
+## True when the type is known, its category is the type's category, the coin delta has the
+## type's sign (zero allowed) and a cycle is referenced exactly when the type is cycle-bound.
+func is_consistent() -> bool:
+	if not TYPE_RULES.has(_type):
+		return false
+	var rule: Array = TYPE_RULES[_type]
+	return _category == rule[0] and _coin_delta * rule[1] >= 0 and (_cycle_id != null) == rule[2] and _xp_delta >= 0 \
+		and ORIGINS.has(_origin)
 
 
 static func from_primitive(value: Variant) -> EconomicTransaction:
 	var reader: PrimitiveReader = PrimitiveReader.new(value, "EconomicTransaction")
-	reader.expect_only(PackedStringArray(["transaction_id", "time_us", "type", "plot_id", "cycle_id", "coin_delta", "xp_delta", "category", "content_version"]))
+	reader.expect_only(PackedStringArray(["transaction_id", "time_us", "type", "plot_id", "cycle_id", "coin_delta",
+		"xp_delta", "category", "content_version", "origin"]))
 	var id: EntityId = EntityId.from_primitive(reader.dict_field("transaction_id"))
-	var cycle: EntityId = EntityId.from_primitive(reader.dict_field("cycle_id"))
+	var cycle_value: Variant = reader.nullable_field("cycle_id")
+	var cycle: EntityId = null if cycle_value == null else EntityId.from_primitive(cycle_value)
+	var origin_value: String = reader.string_field("origin")
 	var tx: EconomicTransaction = EconomicTransaction.new(id, reader.int_field("time_us"), reader.string_field("type"),
 		reader.int_field("plot_id"), cycle, reader.int_field("coin_delta"), reader.int_field("xp_delta"),
-		reader.string_field("category"), reader.string_field("content_version"))
-	if not reader.ok() or id == null or cycle == null:
+		reader.string_field("category"), reader.string_field("content_version"), origin_value)
+	if not reader.ok() or id == null or (cycle_value != null and cycle == null) or not tx.is_consistent():
 		return null
 	return tx

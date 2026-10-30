@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="2" >
+  <testsuite name="balancing/test_smart_benchmark.gd" tests="1" failures="0" skipped="0" time="0.315809" >
+      <testcase name="test_uniform_and_mixed_batches" assertions="35" status="pass" classname="balancing/test_smart_benchmark.gd" time="0.315809" >
+      </testcase>
+  </testsuite>
+  <testsuite name="balancing/test_solver_benchmark.gd" tests="1" failures="0" skipped="0" time="0.828112" >
+      <testcase name="test_benchmark_gate" assertions="11" status="pass" classname="balancing/test_solver_benchmark.gd" time="0.828112" >
+      </testcase>
+  </testsuite>
+</testsuites>

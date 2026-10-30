@@ -76,9 +76,12 @@ func advance_to(target_us: int) -> StateChangeBatch:
 		var time_us: int = _scheduler.peek_time()
 		_state.simulation_time_us = time_us
 		var batch: StateChangeBatch = _process_timestamp(time_us)
+		total.append(batch)
+		if batch.failure_code != FailureCode.NONE:
+			# DEC-026 / M02 E5: stop at the failing timestamp; the caller must not commit this state.
+			return total
 		if batch.changed():
 			_state.state_sequence += 1
-		total.append(batch)
 	_state.simulation_time_us = target_us
 	total.time_us = target_us
 	return total
@@ -105,17 +108,56 @@ func submit_command(command: GameCommand) -> CommandResult:
 		GameCommand.TYPE_PLANT_CROP:
 			result = FarmSystem.plant(_state, _registry, _scheduler, command as PlantCropCommand)
 		GameCommand.TYPE_HARVEST_CROP:
-			result = FarmSystem.harvest(_state, _registry, command as HarvestCropCommand)
+			result = FarmSystem.harvest(_state, _registry, command as HarvestCropCommand, _scheduler)
+		GameCommand.TYPE_PURCHASE_PLOT:
+			result = PurchaseSystem.purchase_plot(_state, _registry, command as PurchasePlotCommand)
+		GameCommand.TYPE_ALLOCATE_SKILL:
+			result = SkillSystem.allocate(_state, _registry, command as AllocateSkillCommand)
+		GameCommand.TYPE_RESET_SKILLS:
+			result = SkillSystem.reset(_state, _registry, command as ResetSkillsCommand)
+		GameCommand.TYPE_PURCHASE_UPGRADE:
+			result = PurchaseSystem.purchase_upgrade(_state, _registry, command as PurchaseUpgradeCommand)
+		GameCommand.TYPE_START_RESEARCH:
+			result = ResearchSystem.start(_state, _registry, _scheduler, command as StartResearchCommand)
+		GameCommand.TYPE_ACCELERATE_RESEARCH:
+			result = ResearchSystem.accelerate(_state, _scheduler, command as AccelerateResearchCommand)
+		GameCommand.TYPE_BATCH_PLANT:
+			result = AutomationSystem.batch_plant(_state, _registry, _scheduler, command as BatchPlantCommand)
+		GameCommand.TYPE_BATCH_HARVEST:
+			result = AutomationSystem.batch_harvest(_state, _registry, _scheduler, command as BatchHarvestCommand)
+		GameCommand.TYPE_APPLY_AND_START:
+			result = AutomationSystem.apply_and_start(_state, _registry, _scheduler, command as ApplyAndStartCommand)
+		GameCommand.TYPE_CONFIGURE_AUTOMATION:
+			result = AutomationSystem.configure(_state, _registry, _scheduler, command as ConfigureAutomationCommand)
+		GameCommand.TYPE_CONFIGURE_BUDGET:
+			result = AutomationSystem.configure_budget(_state, _registry, _scheduler, command as ConfigureBudgetCommand)
 		_:
+			if command is UnavailableCommand:
+				return CommandResult.failed(FailureCode.FEATURE_UNAVAILABLE, "'%s' is not available in this milestone" % command.type(),
+					id, _state.state_sequence)
 			return CommandResult.failed(FailureCode.MALFORMED_ENVELOPE, "unsupported command type", id, _state.state_sequence)
 	if not result.success:
 		return result
 	_state.state_sequence += 1
 	result.state_sequence = _state.state_sequence
-	_state.command_replay.record_success(id, result.to_primitive())
+	_state.command_replay.record_success(id, compact_result(result))
 	return result
 
 
+## Compact replay-cache entry (M02 carry-over 5): enough to answer a duplicate delivery without
+## storing whole batch results inside GameState.
+static func compact_result(result: CommandResult) -> Dictionary:
+	return {
+		"success": result.success,
+		"failure_code": result.failure_code,
+		"command_id": null if result.command_id == null else result.command_id.to_primitive(),
+		"state_sequence": result.state_sequence,
+	}
+
+
+## One logical batch at `time_us` (TRS §4.2, build plan §3.5): phase-1 research completions and
+## phase-2 maturity markers in key order, then one planned farming batch (auto-harvest, credits,
+## replant/retry, seeds, fertilizer, plantings). A failed plan aborts the timestamp (E5).
 func _process_timestamp(time_us: int) -> StateChangeBatch:
 	var batch: StateChangeBatch = StateChangeBatch.new()
 	batch.time_us = time_us
@@ -131,6 +173,12 @@ func _process_timestamp(time_us: int) -> StateChangeBatch:
 				progressed = true
 		if not progressed:
 			break
+	var proposal: BatchProposal = BatchPlanner.plan(_state, _registry, {"auto_harvest": true})
+	if proposal.failure_code != FailureCode.NONE:
+		batch.failure_code = proposal.failure_code
+		return batch
+	if not proposal.is_empty():
+		batch.append(BatchApplier.apply(_state, _registry, _scheduler, proposal))
 	return batch
 
 
@@ -139,5 +187,5 @@ func _dispatch(event: ScheduledEvent) -> SimulationEvent:
 		ScheduledEvent.TYPE_CROP_MATURED:
 			return FarmSystem.mark_mature(_state, event)
 		ScheduledEvent.TYPE_RESEARCH_COMPLETED:
-			return null  # Phase 1 placeholder: research completion is implemented in M02.
+			return ResearchSystem.complete(_state, _registry, event)
 	return null

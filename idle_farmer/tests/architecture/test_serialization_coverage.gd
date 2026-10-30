@@ -38,7 +38,23 @@ func _records() -> Array[Object]:
 		AccountedInterval.new(AccountedInterval.KIND_ACTIVE, 1, 1), state.command_replay,
 		state.upgrades, state.research, state.contracts, state.automation, state.statistics,
 		CommandId.new("s", "e", 1), result, SimulationEvent.new(SimulationEvent.CROP_PLANTED, 0, 1, null),
+		state.automation.plot(1), state.automation.plot(1).settings, state.automation.plot(1).authorization,
+		state.automation.defaults, state.automation.plot(1).rotation, _group(state), _contract(state),
 	]
+
+
+func _group(state: GameState) -> GroupRecord:
+	var group: GroupRecord = GroupRecord.new()
+	group.group_id = state.allocate_entity_id()
+	group.name = "g"
+	return group
+
+
+func _contract(state: GameState) -> ContractInstance:
+	var contract: ContractInstance = ContractInstance.new()
+	contract.instance_id = state.allocate_entity_id()
+	contract.offer_id = "Q01"
+	return contract
 
 
 func test_every_record_field_is_serialized() -> void:
@@ -50,7 +66,8 @@ func test_every_record_field_is_serialized() -> void:
 
 func test_immutable_records_round_trip_all_accessors() -> void:
 	var tx: EconomicTransaction = EconomicTransaction.new(EntityId.new("s", "n", 2), 5, EconomicTransaction.TYPE_HARVEST_CREDIT,
-		3, EntityId.new("s", "n", 1), 16, 6, EconomicTransaction.CATEGORY_HARVEST, "content_m01_v1")
+		3, EntityId.new("s", "n", 1), 16, 6, EconomicTransaction.CATEGORY_HARVEST, "content_m01_v1",
+		EconomicTransaction.ORIGIN_AUTOMATIC)
 	var back: EconomicTransaction = EconomicTransaction.from_primitive(tx.to_primitive())
 	assert_eq(CanonicalCodec.digest(back.to_primitive()), CanonicalCodec.digest(tx.to_primitive()))
 	assert_eq([back.time_us(), back.plot_id(), back.coin_delta(), back.xp_delta()], [5, 3, 16, 6])

@@ -1,0 +1,56 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://balancing/test_smart_benchmark.gd
+* test_uniform_and_mixed_batches
+
+=== Smart batch benchmark (median of 7 runs, 32 plots) ===
+uniform Tomatoes MP, ample     cold     3.27 ms   warm  0.183 ms
+mixed 8 crops MP, ample        cold    17.53 ms   warm  0.196 ms
+mixed 8 crops MP, half         cold    15.14 ms   warm  0.195 ms
+mixed MP/CE/BP groups, half    cold     4.96 ms   warm  0.184 ms
+1/1 passed.
+
+
+res://balancing/test_solver_benchmark.gd
+* test_benchmark_gate
+
+=== RateFrontier benchmark (median of 7 runs, 32 plots) ===
+scaling: uniform tomatoes x1           0.08 ms  path=approx frontier=    3  spend=95
+scaling: uniform tomatoes x8           0.42 ms  path=approx frontier=   17  spend=760
+scaling: uniform tomatoes x16          1.04 ms  path=approx frontier=   33  spend=1520
+uniform tomatoes, ample budget         2.92 ms  path=approx frontier=   65  spend=3040
+uniform tomatoes, half budget          2.84 ms  path=approx frontier=   65  spend=3040
+mixed 8 crops, ample budget           16.14 ms  path=exact_fallback frontier= 1080  spend=47624
+mixed 8 crops, half budget            15.35 ms  path=exact_fallback frontier=  908  spend=24064
+modified durations, half budget       40.30 ms  path=approx frontier= 1370  spend=24064
+adversarial BigInt, half budget       19.72 ms  path=approx frontier=  425  spend=38088
+adversarial BigInt, ample budget      19.10 ms  path=approx frontier=  437  spend=46216
+GATE uniform 2.92 ms (limit 5.0): PASS; worst 40.30 ms (limit 50.0): PASS
+1/1 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               2
+Tests                 2
+Passing Tests         2
+Asserts              46
+Time              1.568s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M02\test_runs\20261030T073141Z\junit.xml
+

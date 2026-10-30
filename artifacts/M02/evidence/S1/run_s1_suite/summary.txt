@@ -1,0 +1,6 @@
+﻿godot=C:\_\tools\godot\4.7.2-stable\Godot_v4.7.2-stable_win64_console.exe
+project=C:\_\IdleFarmer\idle_farmer
+args=--headless --path C:\_\IdleFarmer\idle_farmer -s addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gjunit_xml_file=C:\_\IdleFarmer\artifacts\M02\test_runs\20261030T060009Z\junit.xml -gexit
+gut_exit=0
+tests=259
+verdict_exit=0

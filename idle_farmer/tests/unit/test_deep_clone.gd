@@ -11,7 +11,7 @@ func before_each() -> void:
 
 ## A state touching every record and container type, including extension stubs.
 func _rich_state() -> GameState:
-	var s: GameState = Fixtures.new_game()
+	var s: GameState = Fixtures.new_game_v2()
 	Fixtures.set_xp(s, 5_200)
 	s.player.skill_ranks = {"batch_planting": 1, "batch_harvesting": 1}
 	s.player.available_skill_points = 4
@@ -19,12 +19,20 @@ func _rich_state() -> GameState:
 	s.research.completed = PackedStringArray(["unlock_carrots", "unlock_corn"])
 	Fixtures.add_cycle(s, 1, "wheat", 0)
 	Fixtures.add_cycle(s, 5, "corn", 0)
-	s.plot(9).selected_crop_id = "corn"
+	s.automation.plot(9).settings.set_value(FarmingSettings.CROP_ID, "corn")
+	s.automation.plot(9).authorization.arm("digest-9", 3)
+	s.plot(10).stall_reason = PlotState.STALL_SEED_FUNDS
 	s.upgrades.ranks = {"irrigation": 1}
-	s.contracts.instances = [{"offer_id": "Q01", "progress": {"wheat": 3}}]
+	var contract: ContractInstance = ContractInstance.new()
+	contract.instance_id = s.allocate_entity_id()
+	contract.offer_id = "Q01"
+	contract.objective = {"kind": "quantity", "targets": {"wheat": 20}}
+	contract.progress = {"wheat": 3}
+	s.contracts.instances = [contract]
 	s.contracts.claimed_offer_ids = PackedStringArray(["Q00"])
-	s.automation.defaults = {"crop": "wheat", "nested": {"list": [1, 2, 3]}}
-	s.automation.groups = {"g1": {"plots": [1, 2]}}
+	s.automation.defaults.set_value(FarmingSettings.CROP_ID, "wheat")
+	AutomationFixtures.add_group(s, "Field A", [11])
+	s.automation.plot(12).rotation.entries = PackedStringArray(["wheat", "corn"])
 	s.statistics.buckets = [{"start_us": 0, "coins": 16}]
 	s.statistics.segments = [{"kind": "active", "real_us": 10}]
 	s.statistics.lifetime = {"harvests": 2}
@@ -36,7 +44,7 @@ func _rich_state() -> GameState:
 
 
 func test_rich_state_is_valid_and_round_trips_losslessly() -> void:
-	assert_eq(state.validate(Fixtures.registry()), PackedStringArray())
+	assert_eq(state.validate(Fixtures.registry_v2()), PackedStringArray())
 	var copy: GameState = state.clone()
 	assert_not_null(copy)
 	assert_eq(copy.digest(), state.digest())
@@ -56,14 +64,19 @@ func test_v07_mutating_every_nested_container_leaves_source_unchanged() -> void:
 		func(c: GameState) -> void: c.plots[0].crop_cycle.modifier_snapshot["coin_bonus_bp"] = 5,
 		func(c: GameState) -> void: c.plots[0].crop_cycle.cycle_id.counter = 77,
 		func(c: GameState) -> void: c.plots[4].crop_cycle = null,
-		func(c: GameState) -> void: c.plots[8].selected_crop_id = "wheat",
+		func(c: GameState) -> void: c.automation.plots[8].settings.crop_id = "wheat",
+		func(c: GameState) -> void: c.automation.plots[8].authorization.plan_digest = "x",
+		func(c: GameState) -> void: c.plots[9].stall_reason = PlotState.STALL_NONE,
 		func(c: GameState) -> void: c.plots.pop_back(),
 		func(c: GameState) -> void: c.research.completed.append("unlock_tomatoes"),
 		func(c: GameState) -> void: c.upgrades.ranks["irrigation"] = 2,
-		func(c: GameState) -> void: c.contracts.instances[0]["progress"]["wheat"] = 4,
+		func(c: GameState) -> void: c.contracts.instances[0].progress["wheat"] = 4,
+		func(c: GameState) -> void: c.contracts.instances[0].objective["targets"]["wheat"] = 30,
 		func(c: GameState) -> void: c.contracts.claimed_offer_ids.append("Q09"),
-		func(c: GameState) -> void: c.automation.defaults["nested"]["list"].append(4),
-		func(c: GameState) -> void: c.automation.groups["g1"]["plots"][0] = 9,
+		func(c: GameState) -> void: c.automation.defaults.auto_harvest = true,
+		func(c: GameState) -> void: c.automation.groups.values()[0].settings.set_value(FarmingSettings.AUTO_REPLANT, true),
+		func(c: GameState) -> void: c.automation.groups.values()[0].name = "Renamed",
+		func(c: GameState) -> void: c.automation.plots[11].rotation.entries.append("carrots"),
 		func(c: GameState) -> void: c.statistics.buckets[0]["coins"] = 0,
 		func(c: GameState) -> void: c.statistics.segments.clear(),
 		func(c: GameState) -> void: c.statistics.lifetime["harvests"] = 5,

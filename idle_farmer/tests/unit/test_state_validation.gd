@@ -102,8 +102,26 @@ func test_duplicate_insertion_sequence() -> void:
 
 
 func test_selected_crop_must_exist() -> void:
-	state.plot(3).selected_crop_id = "mango"
-	_expect("PLOT_SELECTED_CROP_UNKNOWN")
+	state.automation.plot(3).settings.set_value(FarmingSettings.CROP_ID, "mango")
+	_expect("SETTINGS_CROP_UNKNOWN")
+
+
+func test_settings_and_authorization_invariants() -> void:
+	state.automation.plot(3).settings.set_value(FarmingSettings.FERTILIZER_POLICY, "gold")
+	_expect("SETTINGS_POLICY_UNKNOWN")
+	state = Fixtures.new_game()
+	state.automation.defaults.clear(FarmingSettings.AUTO_HARVEST)
+	_expect("SETTINGS_DEFAULTS_UNSET")
+	state = Fixtures.new_game()
+	state.automation.plot(4).authorization.armed = true
+	_expect("AUTHORIZATION_INCONSISTENT")
+	state = Fixtures.new_game()
+	state.automation.plot(5).group_id = "g9"
+	_expect("GROUP_UNKNOWN")
+	state = Fixtures.new_game()
+	Fixtures.add_cycle(state, 6, "wheat", 0)
+	state.plot(6).stall_reason = PlotState.STALL_SEED_FUNDS
+	_expect("PLOT_STALL_REASON_INVALID")
 
 
 func test_schema_and_save_identity() -> void:

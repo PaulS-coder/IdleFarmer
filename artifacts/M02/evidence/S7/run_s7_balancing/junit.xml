@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="4" >
+  <testsuite name="balancing/test_smart_benchmark.gd" tests="1" failures="0" skipped="0" time="0.301802" >
+      <testcase name="test_uniform_and_mixed_batches" assertions="35" status="pass" classname="balancing/test_smart_benchmark.gd" time="0.301802" >
+      </testcase>
+  </testsuite>
+  <testsuite name="balancing/test_solver_benchmark.gd" tests="1" failures="0" skipped="0" time="0.849445" >
+      <testcase name="test_benchmark_gate" assertions="11" status="pass" classname="balancing/test_solver_benchmark.gd" time="0.849445" >
+      </testcase>
+  </testsuite>
+  <testsuite name="balancing/test_strategy_pacing.gd" tests="2" failures="0" skipped="0" time="147.339424" >
+      <testcase name="test_v11_strategies_active_and_mixed_offline" assertions="140" status="pass" classname="balancing/test_strategy_pacing.gd" time="132.241136" >
+      </testcase>
+      <testcase name="test_strategy_runs_are_deterministic" assertions="5" status="pass" classname="balancing/test_strategy_pacing.gd" time="15.098288" >
+      </testcase>
+  </testsuite>
+</testsuites>

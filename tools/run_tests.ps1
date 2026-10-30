@@ -18,13 +18,17 @@
 .PARAMETER Select
   Optional test script name filter (forwarded as -gselect).
 
+.PARAMETER Milestone
+  Milestone folder for run output (artifacts/<Milestone>/test_runs). Defaults to M02.
+
 .PARAMETER OutRoot
-  Run output root. Defaults to artifacts/M01/test_runs.
+  Run output root. Overrides -Milestone when given.
 #>
 [CmdletBinding()]
 param(
     [string]$Dir,
     [string]$Select,
+    [string]$Milestone = 'M02',
     [string]$OutRoot
 )
 
@@ -41,7 +45,7 @@ if (-not (Test-Path $godot)) {
     exit 3
 }
 if (-not $OutRoot) {
-    $OutRoot = Join-Path $repoRoot 'artifacts\M01\test_runs'
+    $OutRoot = Join-Path $repoRoot (Join-Path 'artifacts' (Join-Path $Milestone 'test_runs'))
 }
 
 $stamp = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')

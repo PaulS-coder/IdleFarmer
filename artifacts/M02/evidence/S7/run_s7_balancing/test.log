@@ -1,0 +1,103 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://balancing/test_smart_benchmark.gd
+* test_uniform_and_mixed_batches
+
+=== Smart batch benchmark (median of 7 runs, 32 plots) ===
+uniform Tomatoes MP, ample     cold     3.18 ms   warm  0.170 ms
+mixed 8 crops MP, ample        cold    16.38 ms   warm  0.184 ms
+mixed 8 crops MP, half         cold    14.56 ms   warm  0.189 ms
+mixed MP/CE/BP groups, half    cold     5.23 ms   warm  0.195 ms
+1/1 passed.
+
+
+res://balancing/test_solver_benchmark.gd
+* test_benchmark_gate
+
+=== RateFrontier benchmark (median of 7 runs, 32 plots) ===
+scaling: uniform tomatoes x1           0.09 ms  path=approx frontier=    3  spend=95
+scaling: uniform tomatoes x8           0.42 ms  path=approx frontier=   17  spend=760
+scaling: uniform tomatoes x16          1.06 ms  path=approx frontier=   33  spend=1520
+uniform tomatoes, ample budget         3.03 ms  path=approx frontier=   65  spend=3040
+uniform tomatoes, half budget          2.96 ms  path=approx frontier=   65  spend=3040
+mixed 8 crops, ample budget           16.76 ms  path=exact_fallback frontier= 1080  spend=47624
+mixed 8 crops, half budget            15.94 ms  path=exact_fallback frontier=  908  spend=24064
+modified durations, half budget       40.83 ms  path=approx frontier= 1370  spend=24064
+adversarial BigInt, half budget       18.98 ms  path=approx frontier=  425  spend=38088
+adversarial BigInt, ample budget      18.95 ms  path=approx frontier=  437  spend=46216
+GATE uniform 3.03 ms (limit 5.0): PASS; worst 40.83 ms (limit 50.0): PASS
+1/1 passed.
+
+
+res://balancing/test_strategy_pacing.gd
+* test_v11_strategies_active_and_mixed_offline
+* test_strategy_runs_are_deterministic
+
+=== M02 strategy pacing report (1×, full cost, human engagement unobserved) ===
+| strategy | mode | L7 | batch planting | batch harvesting | auto harvest | auto replant | full automation | 3–5 h target | loop crop |
+|---|---|---|---|---|---|---|---|---|---|
+| focused_automation | active_only | 3.65 | 0.65 | 1.15 | 2.65 | 3.65 | 3.65 | met (3–5 h) | corn |
+|   costs | seeds 2448 · fertilizer 0 · research 3750 · boost 0 · plots 2500 · equipment 0 · reset 0 | gross 19522 | harvests 252 manual / 56 auto | idle plot-h 0.00 | stalls {  } | decisions 283 | coins 10824 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 3.65 h · offline 0.00 h | engagement unobserved |
+| focused_automation | mixed_offline | 2.00 (6.00) | 0.58 (1.25) | 0.92 (2.25) | 1.67 (5.00) | 2.00 (6.00) | 2.00 (6.00) | faster than 3–5 h | corn |
+|   costs | seeds 1476 · fertilizer 0 · research 3750 · boost 0 · plots 2500 · equipment 0 · reset 0 | gross 18516 | harvests 282 manual / 56 auto | idle plot-h 60.87 | stalls {  } | decisions 278 | coins 10790 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 2.00 h · offline 4.00 h | engagement unobserved |
+| mixed_growth_profit | active_only | 3.45 | 2.62 | 3.45 | 4.70 | 5.48 | 5.48 | missed (> 5 h) | tomatoes |
+|   costs | seeds 7700 · fertilizer 0 · research 3750 · boost 1875 · plots 10500 · equipment 18650 · reset 0 | gross 49508 | harvests 366 manual / 29 auto | idle plot-h 3.05 | stalls {  } | decisions 607 | coins 7033 · L9 · 30 plots · ranks { "faster_germination": 2, "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 5.48 h · offline 0.00 h | engagement unobserved |
+| mixed_growth_profit | mixed_offline | 2.00 (6.00) | 1.67 (5.00) | 2.00 (6.00) | 2.67 (8.00) | 3.00 (9.00) | 3.00 (9.00) | met (3–5 h) | tomatoes |
+|   costs | seeds 6765 · fertilizer 0 · research 3750 · boost 1875 · plots 10500 · equipment 18650 · reset 0 | gross 46709 | harvests 422 manual / 29 auto | idle plot-h 96.82 | stalls {  } | decisions 657 | coins 5169 · L9 · 30 plots · ranks { "faster_germination": 2, "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 3.00 h · offline 6.00 h | engagement unobserved |
+| coin_xp | active_only | 3.65 | 0.65 | 1.15 | 2.65 | 3.65 | 3.65 | met (3–5 h) | corn |
+|   costs | seeds 2448 · fertilizer 0 · research 3750 · boost 0 · plots 2500 · equipment 0 · reset 0 | gross 19522 | harvests 252 manual / 56 auto | idle plot-h 0.00 | stalls {  } | decisions 283 | coins 10824 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 3.65 h · offline 0.00 h | engagement unobserved |
+| coin_xp | mixed_offline | 2.00 (6.00) | 0.58 (1.25) | 0.92 (2.25) | 1.67 (5.00) | 2.00 (6.00) | 2.00 (6.00) | faster than 3–5 h | corn |
+|   costs | seeds 1476 · fertilizer 0 · research 3750 · boost 0 · plots 2500 · equipment 0 · reset 0 | gross 18516 | harvests 282 manual / 56 auto | idle plot-h 60.87 | stalls {  } | decisions 278 | coins 10790 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 2.00 h · offline 4.00 h | engagement unobserved |
+| low_reserve | active_only | 3.68 | 0.65 | 1.15 | 2.78 | 3.68 | 3.68 | met (3–5 h) | corn |
+|   costs | seeds 2970 · fertilizer 3300 · research 3750 · boost 475 · plots 2500 · equipment 6650 · reset 0 | gross 28754 | harvests 254 manual / 56 auto | idle plot-h 1.48 | stalls {  } | decisions 277 | coins 9109 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 3.68 h · offline 0.00 h | engagement unobserved |
+| low_reserve | mixed_offline | 2.23 (6.23) | 0.58 (1.25) | 0.92 (2.25) | 1.67 (5.00) | 2.23 (6.23) | 2.23 (6.23) | faster than 3–5 h | corn |
+|   costs | seeds 1908 · fertilizer 2120 · research 3750 · boost 475 · plots 2500 · equipment 6650 · reset 0 | gross 23588 | harvests 281 manual / 84 auto | idle plot-h 68.60 | stalls {  } | decisions 283 | coins 6185 · L7 · 28 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 2.23 h · offline 4.00 h | engagement unobserved |
+| high_reserve | active_only | 3.90 | 0.65 | 1.40 | 2.90 | 3.90 | 3.90 | met (3–5 h) | corn |
+|   costs | seeds 2160 · fertilizer 0 · research 3750 · boost 0 · plots 0 · equipment 0 · reset 0 | gross 18624 | harvests 264 manual / 48 auto | idle plot-h 0.00 | stalls {  } | decisions 289 | coins 12714 · L7 · 24 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 3.90 h · offline 0.00 h | engagement unobserved |
+| high_reserve | mixed_offline | 2.33 (7.00) | 0.58 (1.25) | 1.00 (3.00) | 2.00 (6.00) | 2.33 (7.00) | 2.33 (7.00) | faster than 3–5 h | corn |
+|   costs | seeds 1296 · fertilizer 0 · research 3750 · boost 0 · plots 0 · equipment 0 · reset 0 | gross 18672 | harvests 312 manual / 48 auto | idle plot-h 68.40 | stalls {  } | decisions 293 | coins 13626 · L7 · 24 plots · ranks { "efficient_harvest": 2, "batch_planting": 1, "batch_harvesting": 1, "automatic_harvesting": 1, "automatic_replanting": 1 } | online 2.33 h · offline 4.67 h | engagement unobserved |
+
+=== Decision trace: focused_automation, active_only ===
+0.27 h  AllocateSkill  efficient_harvest rank 1
+0.27 h  StartResearch  research unlock_carrots (150)
+0.65 h  AllocateSkill  batch_planting rank 1
+0.65 h  PurchasePlot  plot 25 (250)
+0.67 h  PurchasePlot  plot 26 (250)
+1.15 h  AllocateSkill  batch_harvesting rank 1
+1.15 h  StartResearch  research unlock_corn (800)
+2.15 h  AllocateSkill  efficient_harvest rank 2
+2.15 h  PurchasePlot  plot 27 (1000)
+2.17 h  PurchasePlot  plot 28 (1000)
+2.65 h  AllocateSkill  automatic_harvesting rank 1
+2.65 h  ConfigureAutomation  farm auto-harvest on
+3.65 h  AllocateSkill  automatic_replanting rank 1
+3.65 h  StartResearch  research unlock_tomatoes (2800)
+3.65 h  ApplyAndStart  loop corn+none on 28 plots
+2/2 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               3
+Tests                 4
+Passing Tests         4
+Asserts             191
+Time              148.942s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M02\test_runs\20261030T132119Z\junit.xml
+

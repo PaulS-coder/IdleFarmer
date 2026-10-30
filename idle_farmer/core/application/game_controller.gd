@@ -32,6 +32,7 @@ var _accepted_log: Array[Dictionary] = []
 ## Set while a commit outcome is UNKNOWN: {"prepared", "events", "intent_id", "result", "command"}.
 var _pending: Dictionary = {}
 var _listeners: Array[Callable] = []
+var _harvest_observers: Array[Callable] = []
 
 
 func _init(catalog: ManifestCatalog, sink: CommitSink) -> void:
@@ -96,6 +97,14 @@ func add_commit_listener(listener: Callable) -> void:
 	_listeners.append(listener)
 
 
+## Committed-harvest port (M02-T16, build plan §3.9): `observer` receives one immutable
+## CommittedHarvest per harvest, only after its batch is durably COMMITTED (never for a
+## NOT_COMMITTED candidate; an UNKNOWN commit publishes after reconcile confirms it). Observers get
+## records, never state, so they cannot create a second authoritative mutation.
+func add_committed_harvest_observer(observer: Callable) -> void:
+	_harvest_observers.append(observer)
+
+
 func set_speed_multiplier(speed: int) -> bool:
 	if speed < SimulationClock.MIN_SPEED or speed > SimulationClock.MAX_SPEED:
 		return false
@@ -108,8 +117,65 @@ func reset_speed() -> void:
 
 
 ## Planting quote against committed state, for UI confirmation (same calculation as execution).
-func quote_plant(crop_id: String) -> PlantingQuote:
-	return FarmSystem.quote_for(_committed, _catalog.resolve(_committed.content_version), crop_id)
+func quote_plant(crop_id: String, fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantingQuote:
+	return FarmSystem.quote_for(_committed, _registry(), crop_id, fertilizer_id)
+
+
+## Purchase quotes for UI confirmation; each returns the exact terms an intent should carry
+## ({} when the purchase is not currently offered).
+func quote_plot_purchase() -> Dictionary:
+	return PurchaseSystem.quote_plot(_committed, _registry())
+
+
+func quote_upgrade(family_id: String) -> Dictionary:
+	return PurchaseSystem.quote_upgrade(_committed, _registry(), family_id)
+
+
+func quote_skill(skill_id: String) -> Dictionary:
+	return SkillSystem.quote_allocate(_committed, skill_id)
+
+
+func quote_reset() -> Dictionary:
+	return SkillSystem.quote_reset(_committed, _registry())
+
+
+func quote_research(project_id: String) -> Dictionary:
+	return ResearchSystem.quote_start(_registry(), project_id)
+
+
+## Boost terms (run, fixed charge, rule) and the exact preview labelled with its as-of time
+## (AV-004-03); the accepted-time result is returned by the command itself.
+func quote_research_boost() -> Dictionary:
+	return ResearchSystem.quote_boost(_committed)
+
+
+func preview_research_boost() -> Dictionary:
+	return ResearchSystem.preview_boost(_committed)
+
+
+## Plot-bound planting quote: also carries the plan digest when the planting would arm the plot's
+## loop (Q1) and the confirmed minimum ending balance below the reserve.
+func quote_plant_on(plot_id: int, crop_id: String, fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantingQuote:
+	return FarmSystem.quote_for(_committed, _registry(), crop_id, fertilizer_id, plot_id)
+
+
+func quote_batch_plant(specs: Array[Dictionary]) -> Array[Dictionary]:
+	return AutomationSystem.quote_batch_plant(_committed, _registry(), specs)
+
+
+func quote_apply_and_start(specs: Array[Dictionary]) -> Array[Dictionary]:
+	var members: Array[Dictionary] = AutomationSystem.quote_apply_and_start(_committed, _registry(), specs)
+	for member: Dictionary in members:
+		member.erase("quote")
+	return members
+
+
+func capabilities() -> Capabilities:
+	return Capabilities.of(_committed, _registry())
+
+
+func _registry() -> ContentRegistry:
+	return _catalog.resolve(_committed.content_version)
 
 
 ## Active foreground real time at the current debug speed.
@@ -217,6 +283,8 @@ func _advance(kind: String, real_us: int) -> String:
 	if interval == null:
 		return STATUS_NUMERIC_LIMIT
 	var batch: StateChangeBatch = engine.advance_to(clock.get_simulation_time_us())
+	if batch.failure_code != FailureCode.NONE:
+		return STATUS_NUMERIC_LIMIT  # nothing committed; the previous checkpoint stays authoritative
 	if not working.time_anchor.credit(interval):
 		return STATUS_NUMERIC_LIMIT
 	return _commit(working, batch.events, "", null, null)
@@ -264,9 +332,19 @@ func _on_committed(events: Array[SimulationEvent], intent_id: String, result: Co
 	if result != null:
 		result.commit_status = CommitSink.COMMITTED
 		_remember_intent(intent_id, result)
+	# Harvest records are built before any listener runs, so a listener cannot alter them.
+	var harvests: Array[CommittedHarvest] = []
+	if not _harvest_observers.is_empty():
+		for event: SimulationEvent in events:
+			var harvest: CommittedHarvest = CommittedHarvest.from_event(event, _committed.state_sequence, harvests.size())
+			if harvest != null:
+				harvests.append(harvest)
 	if not events.is_empty():
 		for listener: Callable in _listeners:
 			listener.call(events.duplicate())
+	for harvest: CommittedHarvest in harvests:
+		for observer: Callable in _harvest_observers:
+			observer.call(harvest)
 
 
 func _remember_intent(intent_id: String, result: CommandResult) -> void:

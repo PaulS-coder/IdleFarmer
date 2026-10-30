@@ -29,9 +29,9 @@ var simulation_time_us: int = 0
 var player: PlayerState = PlayerState.new()
 var plots: Array[PlotState] = []
 var upgrades: ExtensionState.Upgrades = ExtensionState.Upgrades.new()
-var research: ExtensionState.Research = ExtensionState.Research.new()
+var research: ResearchState = ResearchState.new()
 var contracts: ExtensionState.Contracts = ExtensionState.Contracts.new()
-var automation: ExtensionState.Automation = ExtensionState.Automation.new()
+var automation: AutomationState = AutomationState.new_default()
 var statistics: ExtensionState.Statistics = ExtensionState.Statistics.new()
 var settings: GameSettings = GameSettings.new()
 var time_anchor: TimeAnchor = TimeAnchor.new()
@@ -135,9 +135,16 @@ func validate(registry: ContentRegistry) -> PackedStringArray:
 	errors.append_array(_validate_plots(registry))
 	errors.append_array(_validate_research(registry))
 	errors.append_array(upgrades.validate())
+	for family_id: String in upgrades.ranks:
+		var rank: int = upgrades.ranks[family_id]
+		if registry.upgrade_max_rank(family_id) == 0:
+			errors.append("UPGRADE_UNKNOWN: '%s' is not defined by '%s'" % [family_id, content_version])
+		elif rank < 1 or rank > registry.upgrade_max_rank(family_id):
+			errors.append("UPGRADE_RANK_RANGE: '%s' rank %d" % [family_id, rank])
 	errors.append_array(research.validate())
 	errors.append_array(contracts.validate())
 	errors.append_array(automation.validate())
+	errors.append_array(_validate_settings_content(registry))
 	errors.append_array(statistics.validate())
 	errors.append_array(settings.validate())
 	errors.append_array(time_anchor.validate())
@@ -163,8 +170,6 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 			errors.append("PLOT_UNLOCK_GAP: plot %d unlocked after a locked plot" % p.plot_id)
 		if not p.unlocked:
 			unlocked_prefix_ended = true
-		if not p.selected_crop_id.is_empty() and not registry.has_crop(p.selected_crop_id):
-			errors.append("PLOT_SELECTED_CROP_UNKNOWN: plot %d '%s'" % [p.plot_id, p.selected_crop_id])
 		var cycle: CropCycle = p.crop_cycle
 		if cycle == null or cycle.cycle_id == null:
 			continue
@@ -175,6 +180,10 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 		seen_cycles[cycle.cycle_id.key()] = true
 		if cycle.cycle_id.save_id != save_id or cycle.cycle_id.counter >= next_entity_id:
 			errors.append("CYCLE_ID_FOREIGN: %s not allocated by this save" % cycle.cycle_id.key())
+		if registry.fertilizer(cycle.fertilizer_id) == null:
+			errors.append("CYCLE_FERTILIZER_UNKNOWN: plot %d '%s'" % [p.plot_id, cycle.fertilizer_id])
+		if cycle.fertilizer_transaction_id != null and cycle.fertilizer_transaction_id.counter >= next_entity_id:
+			errors.append("CYCLE_TRANSACTION_ID_FOREIGN: plot %d fertilizer" % p.plot_id)
 		if cycle.planting_transaction_id != null and cycle.planting_transaction_id.counter >= next_entity_id:
 			errors.append("CYCLE_TRANSACTION_ID_FOREIGN: plot %d" % p.plot_id)
 		if seen_sequences.has(cycle.maturity_insertion_seq) or cycle.maturity_insertion_seq >= next_insertion_sequence:
@@ -192,13 +201,58 @@ func _validate_plots(registry: ContentRegistry) -> PackedStringArray:
 	return errors
 
 
+## Settings may name only content the bound manifest defines (a stored rule may still be unusable,
+## e.g. a Smart policy without the skill; that is inactive, not invalid).
+func _validate_settings_content(registry: ContentRegistry) -> PackedStringArray:
+	var errors: PackedStringArray = PackedStringArray()
+	var records: Dictionary = {"farm": automation.defaults}
+	for i: int in automation.plots.size():
+		records["plot %d" % (i + 1)] = automation.plots[i].settings
+	for key: String in automation.groups:
+		records["group '%s'" % key] = automation.groups[key].settings
+		var group_id: EntityId = automation.groups[key].group_id
+		if group_id != null and (group_id.save_id != save_id or group_id.counter >= next_entity_id):
+			errors.append("GROUP_ID_FOREIGN: %s not allocated by this save" % key)
+	for record: PlotAutomation in automation.plots:
+		for crop_id: String in record.rotation.entries:
+			if not registry.has_crop(crop_id):
+				errors.append("ROTATION_CROP_UNKNOWN: plot %d '%s'" % [record.plot_id, crop_id])
+	for instance: ContractInstance in contracts.instances:
+		for id: EntityId in [instance.instance_id, instance.claim_id]:
+			if id != null and (id.save_id != save_id or id.counter >= next_entity_id):
+				errors.append("CONTRACT_ID_FOREIGN: %s not allocated by this save" % id.key())
+	for context: String in records:
+		var settings: FarmingSettings = records[context]
+		if settings.is_set(FarmingSettings.CROP_ID) and not settings.crop_id.is_empty() and not registry.has_crop(settings.crop_id):
+			errors.append("SETTINGS_CROP_UNKNOWN: %s '%s'" % [context, settings.crop_id])
+		if settings.is_set(FarmingSettings.FERTILIZER_POLICY) and not FarmingSettings.is_smart(settings.fertilizer_policy) \
+				and registry.fertilizer(settings.fertilizer_policy) == null:
+			errors.append("SETTINGS_POLICY_UNKNOWN: %s '%s'" % [context, settings.fertilizer_policy])
+	return errors
+
+
 func _validate_research(registry: ContentRegistry) -> PackedStringArray:
 	var errors: PackedStringArray = PackedStringArray()
 	for research_id: String in research.completed:
 		if registry.research(research_id) == null:
 			errors.append("RESEARCH_UNKNOWN: '%s'" % research_id)
-	if not research.active_project_id.is_empty() and registry.research(research.active_project_id) == null:
+	if not research.is_active():
+		return errors
+	if registry.research(research.active_project_id) == null:
 		errors.append("RESEARCH_UNKNOWN: active '%s'" % research.active_project_id)
+	var run: EntityId = research.active_run_id
+	if run != null and (run.save_id != save_id or run.counter >= next_entity_id):
+		errors.append("RESEARCH_RUN_ID_FOREIGN: %s not allocated by this save" % run.key())
+	if research.active_insertion_seq >= next_insertion_sequence:
+		errors.append("RESEARCH_INSERTION_SEQ_INVALID: seq %d" % research.active_insertion_seq)
+	for p: PlotState in plots:
+		if p.crop_cycle != null and p.crop_cycle.maturity_insertion_seq == research.active_insertion_seq:
+			errors.append("RESEARCH_INSERTION_SEQ_INVALID: seq %d shared with plot %d" % [research.active_insertion_seq, p.plot_id])
+	if research.active_started_us > simulation_time_us:
+		errors.append("RESEARCH_STARTED_IN_FUTURE: '%s'" % research.active_project_id)
+	if research.active_completes_us <= simulation_time_us:
+		errors.append("RESEARCH_OVERDUE: '%s' completes at %d but is still active at %d" % [research.active_project_id,
+			research.active_completes_us, simulation_time_us])
 	return errors
 
 
@@ -280,9 +334,9 @@ static func from_primitive(value: Variant) -> GameState:
 	state.next_insertion_sequence = reader.int_field("next_insertion_sequence")
 	state.player = PlayerState.from_primitive(reader.dict_field("player"))
 	state.upgrades = ExtensionState.Upgrades.from_primitive(reader.dict_field("upgrades"))
-	state.research = ExtensionState.Research.from_primitive(reader.dict_field("research"))
+	state.research = ResearchState.from_primitive(reader.dict_field("research"))
 	state.contracts = ExtensionState.Contracts.from_primitive(reader.dict_field("contracts"))
-	state.automation = ExtensionState.Automation.from_primitive(reader.dict_field("automation"))
+	state.automation = AutomationState.from_primitive(reader.dict_field("automation"))
 	state.statistics = ExtensionState.Statistics.from_primitive(reader.dict_field("statistics"))
 	state.settings = GameSettings.from_primitive(reader.dict_field("settings"))
 	state.time_anchor = TimeAnchor.from_primitive(reader.dict_field("time_anchor"))
