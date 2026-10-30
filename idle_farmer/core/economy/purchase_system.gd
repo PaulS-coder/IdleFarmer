@@ -40,7 +40,7 @@ static func purchase_plot(state: GameState, registry: ContentRegistry, command: 
 	var tx_id: EntityId = state.allocate_entity_id()
 	state.player.coins -= band.cost
 	state.plot(command.plot_id()).unlocked = true
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.affected_plot_ids = [command.plot_id()]
 	result.transactions.append(EconomicTransaction.new(tx_id, state.simulation_time_us, EconomicTransaction.TYPE_PLOT_PURCHASE,
 		command.plot_id(), null, -band.cost, 0, EconomicTransaction.CATEGORY_EXPANSION, state.content_version,
@@ -86,7 +86,7 @@ static func purchase_upgrade(state: GameState, registry: ContentRegistry, comman
 	var tx_id: EntityId = state.allocate_entity_id()
 	state.player.coins -= upgrade.cost
 	state.upgrades.ranks[family] = command.target_rank()
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.transactions.append(EconomicTransaction.new(tx_id, state.simulation_time_us, EconomicTransaction.TYPE_UPGRADE_PURCHASE,
 		0, null, -upgrade.cost, 0, EconomicTransaction.CATEGORY_EQUIPMENT, state.content_version, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.UPGRADE_PURCHASED, state.simulation_time_us, 0, null,

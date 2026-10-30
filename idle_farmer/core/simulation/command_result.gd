@@ -21,6 +21,13 @@ var state_sequence: int = 0
 var commit_status: String = COMMIT_NONE
 
 
+static func succeeded(command: GameCommand) -> CommandResult:
+	var result: CommandResult = CommandResult.new()
+	result.success = true
+	result.command_id = command.command_id()
+	return result
+
+
 static func failed(code: String, detail: String, p_command_id: CommandId, p_state_sequence: int) -> CommandResult:
 	var result: CommandResult = CommandResult.new()
 	result.success = false

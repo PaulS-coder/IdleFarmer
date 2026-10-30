@@ -109,7 +109,7 @@ static func plan(state: GameState, registry: ContentRegistry, inputs: Dictionary
 	var ids: int = proposal.harvests.size()
 	for planting: Dictionary in proposal.plantings:
 		var quote: PlantingQuote = planting["quote"]
-		ids += 3 if quote.fertilizer_id != FertilizerDefinition.NONE_ID else 2
+		ids += FarmSystem.ids_for(quote)
 		if not IntegerMath.add(state.simulation_time_us, quote.growth_us).ok:
 			return BatchProposal.failed(FailureCode.NUMERIC_LIMIT)
 	if not IntegerMath.add(state.next_entity_id, ids).ok \

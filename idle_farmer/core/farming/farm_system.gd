@@ -62,8 +62,8 @@ static func quote_for(state: GameState, registry: ContentRegistry, crop_id: Stri
 		if not quote.plan_digest.is_empty():
 			quote.fallback_accepted = SettingsResolver.effective(state, plot_id).fallback_accepted
 		var cost: MathResult = quote.total_cost()
-		if cost.ok and state.player.coins >= cost.value and state.player.coins - cost.value < state.automation.budget_reserve:
-			quote.min_ending_balance = state.player.coins - cost.value
+		if cost.ok:
+			quote.min_ending_balance = min_ending_balance_for(state.player.coins, cost.value, state.automation.budget_reserve)
 	return quote
 
 
@@ -107,9 +107,7 @@ static func plant(state: GameState, registry: ContentRegistry, scheduler: EventS
 		state.automation.plot(command.plot_id()).authorization.arm(command.plan_digest(), state.state_sequence)
 		applied.events.append(SimulationEvent.new(SimulationEvent.LOOP_ARMED, state.simulation_time_us, command.plot_id(), null,
 			{"plan_digest": command.plan_digest()}))
-	var result: CommandResult = CommandResult.new()
-	result.success = true
-	result.command_id = command.command_id()
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.affected_plot_ids = [command.plot_id()]
 	result.events = applied.events
 	result.transactions = applied.transactions
@@ -124,11 +122,22 @@ static func ending_balance_authorized(coins_after: int, reserve: int, min_ending
 	return coins_after >= reserve
 
 
+## The minimum ending balance a planting costing `total` from a wallet of `coins` confirms: the
+## ending balance when it would end below the farm reserve (FRS §7.1), -1 (none) otherwise.
+static func min_ending_balance_for(coins: int, total: int, reserve: int) -> int:
+	return coins - total if coins >= total and coins - total < reserve else -1
+
+
+## Entity IDs `apply_planting` allocates for `quote`: the cycle and its planting transaction, plus a
+## fertilizer transaction when a fertilizer is applied.
+static func ids_for(quote: PlantingQuote) -> int:
+	return 3 if quote.fertilizer_id != FertilizerDefinition.NONE_ID else 2
+
+
 ## NUMERIC_LIMIT when the planting's IDs, insertion sequence or maturity time are not representable.
 static func planting_room(state: GameState, quote: PlantingQuote) -> String:
-	var has_fertilizer: bool = quote.fertilizer_id != FertilizerDefinition.NONE_ID
 	if not IntegerMath.add(state.simulation_time_us, quote.growth_us).ok \
-			or not IntegerMath.add(state.next_entity_id, 3 if has_fertilizer else 2).ok \
+			or not IntegerMath.add(state.next_entity_id, ids_for(quote)).ok \
 			or not IntegerMath.add(state.next_insertion_sequence, 1).ok:
 		return FailureCode.NUMERIC_LIMIT
 	return FailureCode.NONE
@@ -224,9 +233,7 @@ static func harvest(state: GameState, registry: ContentRegistry, command: Harves
 	if proposal.failure_code != FailureCode.NONE:
 		return CommandResult.failed(proposal.failure_code, "harvest values not representable", command.command_id(), state.state_sequence)
 	var batch: StateChangeBatch = BatchApplier.apply(state, registry, scheduler if scheduler != null else EventScheduler.new(), proposal)
-	var result: CommandResult = CommandResult.new()
-	result.success = true
-	result.command_id = command.command_id()
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.affected_plot_ids = [command.plot_id()]
 	result.events = batch.events
 	result.transactions = batch.transactions

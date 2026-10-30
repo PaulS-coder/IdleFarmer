@@ -43,7 +43,7 @@ static func quote_batch_plant(state: GameState, registry: ContentRegistry, specs
 	for spec: Dictionary in ordered:
 		var quote: PlantingQuote = FarmSystem.quote_for(state, registry, spec["crop_id"], spec["fertilizer_id"], spec["plot_id"])
 		var total: int = quote.seed_cost + quote.fertilizer_cost
-		quote.min_ending_balance = coins - total if coins >= total and coins - total < state.automation.budget_reserve else -1
+		quote.min_ending_balance = FarmSystem.min_ending_balance_for(coins, total, state.automation.budget_reserve)
 		members.append(RawIntent.plant("", spec["plot_id"], quote).terms)
 		coins -= total if coins >= total else 0
 	return members
@@ -61,7 +61,7 @@ static func batch_plant(state: GameState, registry: ContentRegistry, scheduler: 
 		var quote: PlantingQuote = FarmSystem.quote_for(state, registry, member.crop_id(), member.fertilizer_id(), member.plot_id())
 		var code: String = FarmSystem.check_plant_target(state, registry, member.plot_id(), member.crop_id(), member.fertilizer_id())
 		var total: int = quote.seed_cost + quote.fertilizer_cost
-		var id_need: int = 3 if quote.fertilizer_id != FertilizerDefinition.NONE_ID else 2
+		var id_need: int = FarmSystem.ids_for(quote)
 		if code == FailureCode.NONE and not quote.ok:
 			code = FailureCode.NUMERIC_LIMIT
 		elif code == FailureCode.NONE and not quote.matches(member):
@@ -82,7 +82,7 @@ static func batch_plant(state: GameState, registry: ContentRegistry, scheduler: 
 			accepted.append([member, quote])
 	if accepted.is_empty():
 		return _all_skipped(command, outcomes, state)
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.member_outcomes = outcomes
 	for pair: Array in accepted:
 		var member: PlantCropCommand = pair[0]
@@ -113,7 +113,7 @@ static func batch_harvest(state: GameState, registry: ContentRegistry, scheduler
 	var proposal: BatchProposal = BatchPlanner.plan(state, registry, {"harvest_plot_ids": selected})
 	if proposal.failure_code != FailureCode.NONE:
 		return CommandResult.failed(proposal.failure_code, "batch values not representable", command.command_id(), state.state_sequence)
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.member_outcomes = outcomes
 	_merge(result, BatchApplier.apply(state, registry, scheduler, proposal), -1)
 	result.affected_plot_ids = selected
@@ -154,7 +154,7 @@ static func apply_and_start(state: GameState, registry: ContentRegistry, schedul
 		var quote: PlantingQuote = expected.get("quote")
 		var total: int = member["seed_cost"] + member["fertilizer_cost"]
 		var plants: bool = code == FailureCode.NONE and state.plot(member["plot_id"]).crop_cycle == null
-		var id_need: int = (3 if quote.fertilizer_id != FertilizerDefinition.NONE_ID else 2) if plants else 0
+		var id_need: int = FarmSystem.ids_for(quote) if plants else 0
 		if code == FailureCode.NONE and not _same_terms(member, expected):
 			code = FailureCode.STALE_TERMS
 		elif plants and coins < total:
@@ -173,7 +173,7 @@ static func apply_and_start(state: GameState, registry: ContentRegistry, schedul
 			accepted.append([member, quote if plants else null])
 	if accepted.is_empty():
 		return _all_skipped(command, outcomes, state)
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.member_outcomes = outcomes
 	for pair: Array in accepted:
 		var member: Dictionary = pair[0]
@@ -228,7 +228,7 @@ static func _apply_member_terms(state: GameState, registry: ContentRegistry, spe
 	var total: int = quote.seed_cost + quote.fertilizer_cost
 	terms["seed_cost"] = quote.seed_cost
 	terms["fertilizer_cost"] = quote.fertilizer_cost
-	terms["min_ending_balance"] = coins - total if coins >= total and coins - total < state.automation.budget_reserve else -1
+	terms["min_ending_balance"] = FarmSystem.min_ending_balance_for(coins, total, state.automation.budget_reserve)
 	terms["quote"] = quote
 	return terms
 
@@ -272,7 +272,7 @@ static func configure(state: GameState, registry: ContentRegistry, scheduler: Ev
 	if proposal.failure_code != FailureCode.NONE:
 		return CommandResult.failed(proposal.failure_code, "batch values not representable", command.command_id(), state.state_sequence)
 	_apply_setting(state, caps, command)
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.affected_plot_ids = change["touched"]
 	result.events.append(SimulationEvent.new(SimulationEvent.SETTINGS_CHANGED, state.simulation_time_us, command.plot_id(), null,
 		{"field": field, "set": command.is_set(), "value": value}))
@@ -341,7 +341,7 @@ static func configure_budget(state: GameState, registry: ContentRegistry, schedu
 		return CommandResult.failed(proposal.failure_code, "batch values not representable", command.command_id(), state.state_sequence)
 	state.automation.budget_reserve = command.reserve()
 	state.automation.budget_protection_percent = command.protection_percent()
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.events.append(SimulationEvent.new(SimulationEvent.SETTINGS_CHANGED, state.simulation_time_us, 0, null,
 		{"reserve": command.reserve(), "protection_percent": command.protection_percent()}))
 	_merge(result, BatchApplier.apply(state, registry, scheduler, proposal), -1)

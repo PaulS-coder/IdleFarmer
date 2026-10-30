@@ -56,7 +56,7 @@ static func start(state: GameState, registry: ContentRegistry, scheduler: EventS
 	research.boost_used = false
 	state.player.coins -= project.cost
 	scheduler.push(completion_event(research))
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.transactions.append(EconomicTransaction.new(tx_id, state.simulation_time_us, EconomicTransaction.TYPE_RESEARCH_PURCHASE,
 		0, null, -project.cost, 0, EconomicTransaction.CATEGORY_RESEARCH, state.content_version, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.RESEARCH_STARTED, state.simulation_time_us, 0, null,
@@ -124,7 +124,7 @@ static func accelerate(state: GameState, scheduler: EventScheduler, command: Acc
 	research.boost_used = true
 	state.player.coins -= charge.value
 	scheduler.push(completion_event(research))
-	var result: CommandResult = SkillSystem.succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.transactions.append(EconomicTransaction.new(tx_id, state.simulation_time_us, EconomicTransaction.TYPE_RESEARCH_BOOST,
 		0, null, -charge.value, 0, EconomicTransaction.CATEGORY_RESEARCH, state.content_version, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.RESEARCH_BOOSTED, state.simulation_time_us, 0, null,

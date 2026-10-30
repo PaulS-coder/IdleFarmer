@@ -35,7 +35,7 @@ static func allocate(state: GameState, registry: ContentRegistry, command: Alloc
 	var rank: int = state.player.skill_ranks.get(command.skill_id(), 0) + 1
 	state.player.skill_ranks[command.skill_id()] = rank
 	state.player.available_skill_points -= SkillDefinition.POINT_COST_PER_RANK
-	var result: CommandResult = succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	result.events.append(SimulationEvent.new(SimulationEvent.SKILL_ALLOCATED, state.simulation_time_us, 0, null,
 		{"skill_id": command.skill_id(), "rank": rank}))
 	return result
@@ -89,7 +89,7 @@ static func reset(state: GameState, registry: ContentRegistry, command: ResetSki
 	state.player.available_skill_points = refunded.value
 	state.player.skill_ranks = {}
 	var disarmed: Array[int] = AutomationSystem.disarm_all(state)
-	var result: CommandResult = succeeded(command)
+	var result: CommandResult = CommandResult.succeeded(command)
 	if not disarmed.is_empty():
 		result.events.append(SimulationEvent.new(SimulationEvent.LOOPS_DISARMED, state.simulation_time_us, 0, null,
 			{"plot_ids": disarmed}))
@@ -97,11 +97,4 @@ static func reset(state: GameState, registry: ContentRegistry, command: ResetSki
 		0, null, -price.value, 0, EconomicTransaction.CATEGORY_RESET, state.content_version, EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.SKILLS_RESET, state.simulation_time_us, 0, null,
 		{"price": price.value, "refunded_points": allocated}))
-	return result
-
-
-static func succeeded(command: GameCommand) -> CommandResult:
-	var result: CommandResult = CommandResult.new()
-	result.success = true
-	result.command_id = command.command_id()
 	return result
