@@ -284,6 +284,104 @@ def allocator_cases(rng):
     return cases
 
 
+def crop_options(crop):
+    """Paid-tier options [tier, price, incremental net] for a crop with no other bonuses (FRS §6.2/§7.2)."""
+    base = CROPS[crop][2]
+    plain = base
+    options = []
+    for tier, fert in ((1, "basic"), (2, "premium"), (3, "advanced")):
+        gross = base * (10000 + FERTILIZERS[fert][0]) // 10000
+        price = fert_price(fert, base)
+        options.append((tier, price, gross - plain - price))
+    return options
+
+
+def ce_solve(plots, funds):
+    """Q2 Capital Efficiency, from the build plan text: repeatedly take the affordable step with
+    positive delta-net and the highest delta-net/delta-cost; ties: higher delta-net/duration, lower
+    delta-cost, lower plot ID, lower target tier. Steps without positive delta-cost are skipped."""
+    cur = {pid: (0, 0, 0) for pid, _, _ in plots}  # tier, cost, net
+    spent = 0
+    while True:
+        best = None
+        for pid, duration, options in plots:
+            tier, cost, net = cur[pid]
+            for t, c, n in options:
+                dc, dn = c - cost, n - net
+                if t <= tier or n <= 0 or dc <= 0 or dn <= 0 or dc > funds - spent:
+                    continue
+                key = (-Fraction(dn, dc), -Fraction(dn, duration), dc, pid, t)
+                if best is None or key < best[0]:
+                    best = (key, pid, t, c, n, dc)
+        if best is None:
+            break
+        _, pid, t, c, n, dc = best
+        spent += dc
+        cur[pid] = (t, c, n)
+    return [cur[pid][0] for pid, _, _ in sorted(plots)], spent
+
+
+def smart_batch(m, c, groups):
+    """FRS §7.3: groups in order; MP/CE spend from remaining M; BP from min(remaining M, remaining C)."""
+    tiers, total, bp_total = {}, 0, 0
+    for mode, plots in groups:
+        funds = min(m, c) if mode == "smart_bp" else m
+        if mode == "smart_ce":
+            chosen, spend = ce_solve(plots, funds)
+        else:
+            chosen, spend, _ = solve(sorted(plots), funds)
+        for (pid, _, _), t in zip(sorted(plots), chosen):
+            tiers[pid] = t
+        m -= spend
+        total += spend
+        if mode == "smart_bp":
+            c -= spend
+            bp_total += spend
+    return sorted([[pid, t] for pid, t in tiers.items()]), total, bp_total
+
+
+def smart_cases(rng):
+    minute = 60_000_000
+    def plot(pid, crop):
+        return (pid, CROPS[crop][0] * minute, crop_options(crop))
+    toms = [plot(1, "tomatoes"), plot(2, "tomatoes")]
+    cases = [
+        # DVS-010: W=205, R=0, two 60-min Tomatoes -> A = 205 - 110 = 95.
+        ("dvs010_mp", 95, 23, [("smart_mp", toms)]),
+        ("dvs010_bp25", 95, 23, [("smart_bp", toms)]),
+        ("dvs010_mp_budget41", 41, 10, [("smart_mp", toms)]),
+        ("dvs010_ce", 95, 23, [("smart_ce", toms)]),
+        # DVS-008 shape: M = 600, C = 150; all-BP, and MP before BP leaving BP less.
+        ("dvs008_all_bp", 600, 150, [("smart_bp", [plot(1, "pumpkins"), plot(2, "sunflowers"), plot(3, "tomatoes")])]),
+        ("dvs008_mp_then_bp", 600, 150, [("smart_mp", [plot(1, "pumpkins"), plot(2, "blueberries")]),
+                                        ("smart_bp", [plot(3, "sunflowers"), plot(4, "tomatoes")])]),
+        ("mp_ce_bp_order", 900, 300, [("smart_mp", [plot(1, "grapes")]), ("smart_ce", [plot(2, "coffee"), plot(3, "rice")]),
+                                     ("smart_bp", [plot(4, "pumpkins"), plot(5, "soybeans")])]),
+        # CE ranks by ROI across crops: Pumpkins Basic (120/180) before Strawberries Basic (44/67).
+        ("ce_roi_order", 300, 75, [("smart_ce", [plot(1, "pumpkins"), plot(2, "strawberries")])]),
+        ("wheat_carrots_corn", 10_000, 2_500, [("smart_mp", [plot(1, "wheat"), plot(2, "carrots"), plot(3, "corn")])]),
+    ]
+    profitable = ["tomatoes", "pumpkins", "sunflowers", "strawberries", "blueberries", "soybeans", "grapes", "coffee", "rice",
+                  "corn", "cotton", "saffron", "vanilla"]
+    for n in range(36):
+        pid = 0
+        groups = []
+        for mode in ("smart_mp", "smart_ce", "smart_bp"):
+            if rng.random() < 0.7:
+                members = []
+                for _ in range(rng.randint(1, 4)):
+                    pid += 1
+                    members.append(plot(pid, rng.choice(profitable)))
+                groups.append((mode, members))
+        if not groups:
+            pid += 1
+            groups.append(("smart_mp", [plot(pid, "tomatoes")]))
+        m = rng.choice([0, rng.randint(0, 600), rng.randint(0, 6000), rng.randint(0, 40000)])
+        c = m * rng.choice([0, 25, 50, 100]) // 100
+        cases.append(("random_%02d" % n, m, c, groups))
+    return cases
+
+
 def gd(v):
     if isinstance(v, bool):
         return "true" if v else "false"
@@ -351,6 +449,15 @@ def main() -> None:
     for name, w, r, pct, prot, cands in allocator_cases(alloc_rng):
         plan, stalls, s_, a_, f_, m_, c_, passes, excl = allocate(w, r, pct, prot, cands)
         lines.append("\t" + gd([name, w, r, pct, prot, [list(c) for c in cands], plan, stalls, s_, a_, f_, m_, c_, passes, excl]) + ",")
+    lines.append("]")
+    smart_rng = random.Random(SEED + 13)  # separate stream: earlier vectors stay byte-identical
+    lines += ["", "## [name, M, C, groups [[mode, [[plot, duration_us, [[tier, price, net], ...]], ...]]] in group order,",
+              "##  expected [[plot, tier]], Smart spend, Budget Protection spend] (FRS §§7.2-7.3, Q2, DVS-008/010).",
+              "const SMART: Array[Array] = ["]
+    for name, m, c, groups in smart_cases(smart_rng):
+        tiers, total, bp_total = smart_batch(m, c, groups)
+        group_list = [[mode, [[pl[0], pl[1], [list(o) for o in pl[2]]] for pl in plots]] for mode, plots in groups]
+        lines.append("\t" + gd([name, m, c, group_list, tiers, total, bp_total]) + ",")
     lines.append("]")
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {OUT}")
