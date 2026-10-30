@@ -1,0 +1,45 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://balancing/test_solver_benchmark.gd
+* test_benchmark_gate
+
+=== RateFrontier benchmark (median of 7 runs, 32 plots) ===
+scaling: uniform tomatoes x1           0.10 ms  path=approx frontier=    3  spend=95
+scaling: uniform tomatoes x8           0.51 ms  path=approx frontier=   17  spend=760
+scaling: uniform tomatoes x16          0.99 ms  path=approx frontier=   33  spend=1520
+uniform tomatoes, ample budget         3.00 ms  path=approx frontier=   65  spend=3040
+uniform tomatoes, half budget          3.08 ms  path=approx frontier=   65  spend=3040
+mixed 8 crops, ample budget           16.46 ms  path=exact_fallback frontier= 1080  spend=47624
+mixed 8 crops, half budget            15.98 ms  path=exact_fallback frontier=  908  spend=24064
+modified durations, half budget       41.06 ms  path=approx frontier= 1370  spend=24064
+adversarial BigInt, half budget       20.48 ms  path=approx frontier=  425  spend=38088
+adversarial BigInt, ample budget      18.91 ms  path=approx frontier=  437  spend=46216
+GATE uniform 3.00 ms (limit 2.0): FAIL; worst 41.06 ms (limit 50.0): PASS
+1/1 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 1
+Passing Tests         1
+Asserts              11
+Time              1.268s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M02\test_runs\20261030T054214Z\junit.xml
+

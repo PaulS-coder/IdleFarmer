@@ -434,3 +434,4 @@ Smart never chooses a negative-net option, so Wheat, Carrots and Corn above Basi
 | Date | Change |
 |---|---|
 | 2026-10-30 | Initial version from the approved Q1–Q3 and E1–E18. Oracle values recomputed independently in Python (fertilizer table, reset prices, upgrade totals, capped durations, AV-005-03 replan). |
+| 2026-10-30 | S0: the exact solver is implemented as `RateFrontier`: identical-plot classes, an integer lower approximation with a certified error bound, and an exact BigInt fallback (denominator = Π distinct durations instead of an lcm). Benchmark: worst case 41 ms (gate 50, passed); uniform 32-plot 3.0 ms (gate 2, missed); see `artifacts/M02/evidence/S0`. `RawIntent` is now `{intent_id, type, terms}`. Runner gained `-Milestone`. |

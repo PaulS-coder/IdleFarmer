@@ -81,7 +81,8 @@ static func plant(state: GameState, registry: ContentRegistry, scheduler: EventS
 	result.command_id = command.command_id()
 	result.affected_plot_ids = [cycle.plot_id]
 	result.transactions.append(EconomicTransaction.new(cycle.planting_transaction_id, now, EconomicTransaction.TYPE_SEED_PURCHASE,
-		cycle.plot_id, cycle.cycle_id, -quote.seed_cost, 0, EconomicTransaction.CATEGORY_SEEDS, quote.manifest_id))
+		cycle.plot_id, cycle.cycle_id, -quote.seed_cost, 0, EconomicTransaction.CATEGORY_SEEDS, quote.manifest_id,
+		EconomicTransaction.ORIGIN_MANUAL))
 	result.events.append(SimulationEvent.new(SimulationEvent.CROP_PLANTED, now, cycle.plot_id, cycle.cycle_id,
 		{"crop_id": cycle.crop_id, "matures_at_us": cycle.matures_at_us}))
 	return result
@@ -119,7 +120,7 @@ static func harvest(state: GameState, registry: ContentRegistry, command: Harves
 		failure = FailureCode.CROP_NOT_READY
 	if failure != FailureCode.NONE:
 		return CommandResult.failed(failure, "plot %d" % command.plot_id(), command.command_id(), state.state_sequence)
-	var batch: StateChangeBatch = harvest_ready_cycle(state, registry, command.plot_id())
+	var batch: StateChangeBatch = harvest_ready_cycle(state, registry, command.plot_id(), EconomicTransaction.ORIGIN_MANUAL)
 	if batch.failure_code != FailureCode.NONE:
 		return CommandResult.failed(batch.failure_code, "harvest values not representable", command.command_id(), state.state_sequence)
 	var result: CommandResult = CommandResult.new()
@@ -134,7 +135,7 @@ static func harvest(state: GameState, registry: ContentRegistry, command: Harves
 ## The single harvest transition shared by manual and (M02) automatic harvesting: credits the
 ## snapshotted reward once, applies level gains, terminates the cycle. The caller guarantees the
 ## plot holds a Ready cycle. On numeric failure returns a batch with failure_code and no mutation.
-static func harvest_ready_cycle(state: GameState, registry: ContentRegistry, plot_id: int) -> StateChangeBatch:
+static func harvest_ready_cycle(state: GameState, registry: ContentRegistry, plot_id: int, origin: String) -> StateChangeBatch:
 	var batch: StateChangeBatch = StateChangeBatch.new()
 	var now: int = state.simulation_time_us
 	batch.time_us = now
@@ -152,7 +153,7 @@ static func harvest_ready_cycle(state: GameState, registry: ContentRegistry, plo
 	ProgressionSystem.apply(state.player, grant)
 	state.plot(plot_id).crop_cycle = null
 	batch.transactions.append(EconomicTransaction.new(tx_id, now, EconomicTransaction.TYPE_HARVEST_CREDIT, plot_id,
-		cycle.cycle_id, reward[0], reward[1], EconomicTransaction.CATEGORY_HARVEST, cycle.content_version))
+		cycle.cycle_id, reward[0], reward[1], EconomicTransaction.CATEGORY_HARVEST, cycle.content_version, origin))
 	batch.events.append(SimulationEvent.new(SimulationEvent.CROP_HARVESTED, now, plot_id, cycle.cycle_id,
 		{"crop_id": cycle.crop_id, "coins": reward[0], "xp": reward[1]}))
 	if grant.levels_gained() > 0:

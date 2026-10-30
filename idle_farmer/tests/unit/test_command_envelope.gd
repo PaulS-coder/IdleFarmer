@@ -79,7 +79,7 @@ func test_command_result_round_trip() -> void:
 	result.events.append(SimulationEvent.new(SimulationEvent.CROP_PLANTED, 0, 3, EntityId.new(Fixtures.SAVE_ID, epoch, 1), {"crop_id": "wheat"}))
 	result.transactions.append(EconomicTransaction.new(EntityId.new(Fixtures.SAVE_ID, epoch, 2), 0,
 		EconomicTransaction.TYPE_SEED_PURCHASE, 3, EntityId.new(Fixtures.SAVE_ID, epoch, 1), 0, 0,
-		EconomicTransaction.CATEGORY_SEEDS, "content_m01_v1"))
+		EconomicTransaction.CATEGORY_SEEDS, "content_m01_v1", EconomicTransaction.ORIGIN_MANUAL))
 	result.state_sequence = 4
 	result.commit_status = CommandResult.COMMIT_COMMITTED
 	var back: CommandResult = CommandResult.from_primitive(result.to_primitive())

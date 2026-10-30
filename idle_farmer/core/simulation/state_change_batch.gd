@@ -15,7 +15,10 @@ func changed() -> bool:
 	return not events.is_empty() or not transactions.is_empty()
 
 
+## Merges `other` into this batch. The first failure is kept: a failed batch stays failed (DEC-026).
 func append(other: StateChangeBatch) -> void:
+	if failure_code == FailureCode.NONE:
+		failure_code = other.failure_code
 	events.append_array(other.events)
 	transactions.append_array(other.transactions)
 	time_us = maxi(time_us, other.time_us)

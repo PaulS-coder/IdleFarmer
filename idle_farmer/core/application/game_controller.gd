@@ -217,6 +217,8 @@ func _advance(kind: String, real_us: int) -> String:
 	if interval == null:
 		return STATUS_NUMERIC_LIMIT
 	var batch: StateChangeBatch = engine.advance_to(clock.get_simulation_time_us())
+	if batch.failure_code != FailureCode.NONE:
+		return STATUS_NUMERIC_LIMIT  # nothing committed; the previous checkpoint stays authoritative
 	if not working.time_anchor.credit(interval):
 		return STATUS_NUMERIC_LIMIT
 	return _commit(working, batch.events, "", null, null)

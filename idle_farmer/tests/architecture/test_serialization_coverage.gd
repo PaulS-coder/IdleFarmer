@@ -50,7 +50,8 @@ func test_every_record_field_is_serialized() -> void:
 
 func test_immutable_records_round_trip_all_accessors() -> void:
 	var tx: EconomicTransaction = EconomicTransaction.new(EntityId.new("s", "n", 2), 5, EconomicTransaction.TYPE_HARVEST_CREDIT,
-		3, EntityId.new("s", "n", 1), 16, 6, EconomicTransaction.CATEGORY_HARVEST, "content_m01_v1")
+		3, EntityId.new("s", "n", 1), 16, 6, EconomicTransaction.CATEGORY_HARVEST, "content_m01_v1",
+		EconomicTransaction.ORIGIN_AUTOMATIC)
 	var back: EconomicTransaction = EconomicTransaction.from_primitive(tx.to_primitive())
 	assert_eq(CanonicalCodec.digest(back.to_primitive()), CanonicalCodec.digest(tx.to_primitive()))
 	assert_eq([back.time_us(), back.plot_id(), back.coin_delta(), back.xp_delta()], [5, 3, 16, 6])

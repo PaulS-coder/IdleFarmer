@@ -1,12 +1,19 @@
 class_name EconomicTransaction
 extends RefCounted
 ## Immutable record of one coin/XP movement (TRS §3.5). Fields are private and set once.
+## `cycle_id` is null for movements not tied to a crop cycle (research, upgrades, plots, reset —
+## M02). `origin` records whether the player, automation or the system caused it (M02 E13).
 
 const TYPE_SEED_PURCHASE: String = "seed_purchase"
 const TYPE_HARVEST_CREDIT: String = "harvest_credit"
 
 const CATEGORY_SEEDS: String = "seeds"
 const CATEGORY_HARVEST: String = "harvest"
+
+const ORIGIN_MANUAL: String = "manual"
+const ORIGIN_AUTOMATIC: String = "automatic"
+const ORIGIN_SYSTEM: String = "system"
+const ORIGINS: PackedStringArray = ["manual", "automatic", "system"]
 
 var _transaction_id: EntityId
 var _time_us: int
@@ -17,10 +24,11 @@ var _coin_delta: int
 var _xp_delta: int
 var _category: String
 var _content_version: String
+var _origin: String
 
 
 func _init(p_transaction_id: EntityId, p_time_us: int, p_type: String, p_plot_id: int, p_cycle_id: EntityId,
-		p_coin_delta: int, p_xp_delta: int, p_category: String, p_content_version: String) -> void:
+		p_coin_delta: int, p_xp_delta: int, p_category: String, p_content_version: String, p_origin: String) -> void:
 	_transaction_id = p_transaction_id
 	_time_us = p_time_us
 	_type = p_type
@@ -30,6 +38,7 @@ func _init(p_transaction_id: EntityId, p_time_us: int, p_type: String, p_plot_id
 	_xp_delta = p_xp_delta
 	_category = p_category
 	_content_version = p_content_version
+	_origin = p_origin
 
 
 func transaction_id() -> EntityId:
@@ -68,6 +77,10 @@ func content_version() -> String:
 	return _content_version
 
 
+func origin() -> String:
+	return _origin
+
+
 func to_primitive() -> Dictionary:
 	return {
 		"transaction_id": EntityId.nullable_to_primitive(_transaction_id),
@@ -79,17 +92,21 @@ func to_primitive() -> Dictionary:
 		"xp_delta": _xp_delta,
 		"category": _category,
 		"content_version": _content_version,
+		"origin": _origin,
 	}
 
 
 static func from_primitive(value: Variant) -> EconomicTransaction:
 	var reader: PrimitiveReader = PrimitiveReader.new(value, "EconomicTransaction")
-	reader.expect_only(PackedStringArray(["transaction_id", "time_us", "type", "plot_id", "cycle_id", "coin_delta", "xp_delta", "category", "content_version"]))
+	reader.expect_only(PackedStringArray(["transaction_id", "time_us", "type", "plot_id", "cycle_id", "coin_delta",
+		"xp_delta", "category", "content_version", "origin"]))
 	var id: EntityId = EntityId.from_primitive(reader.dict_field("transaction_id"))
-	var cycle: EntityId = EntityId.from_primitive(reader.dict_field("cycle_id"))
+	var cycle_value: Variant = reader.nullable_field("cycle_id")
+	var cycle: EntityId = null if cycle_value == null else EntityId.from_primitive(cycle_value)
+	var origin_value: String = reader.string_field("origin")
 	var tx: EconomicTransaction = EconomicTransaction.new(id, reader.int_field("time_us"), reader.string_field("type"),
 		reader.int_field("plot_id"), cycle, reader.int_field("coin_delta"), reader.int_field("xp_delta"),
-		reader.string_field("category"), reader.string_field("content_version"))
-	if not reader.ok() or id == null or cycle == null:
+		reader.string_field("category"), reader.string_field("content_version"), origin_value)
+	if not reader.ok() or id == null or (cycle_value != null and cycle == null) or not ORIGINS.has(origin_value):
 		return null
 	return tx

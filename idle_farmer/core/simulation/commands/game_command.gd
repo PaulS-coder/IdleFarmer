@@ -68,12 +68,7 @@ static func from_primitive(value: Variant) -> GameCommand:
 	var args: Dictionary = reader.dict_field("args")
 	if not reader.ok() or id == null:
 		return null
-	match command_type:
-		TYPE_PLANT_CROP:
-			return PlantCropCommand.from_args(id, time_us, order, args)
-		TYPE_HARVEST_CROP:
-			return HarvestCropCommand.from_args(id, time_us, order, args)
-	return null
+	return CommandFactory.build(command_type, id, time_us, order, args)
 
 
 func _args_valid() -> bool:

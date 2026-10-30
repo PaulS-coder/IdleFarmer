@@ -76,9 +76,12 @@ func advance_to(target_us: int) -> StateChangeBatch:
 		var time_us: int = _scheduler.peek_time()
 		_state.simulation_time_us = time_us
 		var batch: StateChangeBatch = _process_timestamp(time_us)
+		total.append(batch)
+		if batch.failure_code != FailureCode.NONE:
+			# DEC-026 / M02 E5: stop at the failing timestamp; the caller must not commit this state.
+			return total
 		if batch.changed():
 			_state.state_sequence += 1
-		total.append(batch)
 	_state.simulation_time_us = target_us
 	total.time_us = target_us
 	return total
@@ -112,8 +115,19 @@ func submit_command(command: GameCommand) -> CommandResult:
 		return result
 	_state.state_sequence += 1
 	result.state_sequence = _state.state_sequence
-	_state.command_replay.record_success(id, result.to_primitive())
+	_state.command_replay.record_success(id, compact_result(result))
 	return result
+
+
+## Compact replay-cache entry (M02 carry-over 5): enough to answer a duplicate delivery without
+## storing whole batch results inside GameState.
+static func compact_result(result: CommandResult) -> Dictionary:
+	return {
+		"success": result.success,
+		"failure_code": result.failure_code,
+		"command_id": null if result.command_id == null else result.command_id.to_primitive(),
+		"state_sequence": result.state_sequence,
+	}
 
 
 func _process_timestamp(time_us: int) -> StateChangeBatch:
