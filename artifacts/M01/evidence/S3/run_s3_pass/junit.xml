@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="160" >
+  <testsuite name="tests/unit/test_canonical_codec.gd" tests="6" failures="0" skipped="0" time="0.033131" >
+      <testcase name="test_encoding_and_digest_match_independent_oracle" assertions="30" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.005415" >
+      </testcase>
+      <testcase name="test_round_trip_is_lossless_at_int64_bounds" assertions="33" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.005295" >
+      </testcase>
+      <testcase name="test_key_insertion_order_does_not_change_digest" assertions="1" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004667" >
+      </testcase>
+      <testcase name="test_digest_distinguishes_type_and_order" assertions="3" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004679" >
+      </testcase>
+      <testcase name="test_rejects_unsupported_values" assertions="20" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.004329" >
+      </testcase>
+      <testcase name="test_decode_rejects_malformed_and_noncanonical_input" assertions="22" status="pass" classname="tests/unit/test_canonical_codec.gd" time="0.008746" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_command_envelope.gd" tests="8" failures="0" skipped="0" time="0.018549" >
+      <testcase name="test_commands_round_trip_through_replay_records" assertions="6" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.005551" >
+      </testcase>
+      <testcase name="test_accepted_envelope_cannot_be_edited_through_accessors" assertions="4" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.002007" >
+      </testcase>
+      <testcase name="test_envelope_well_formedness" assertions="12" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.002352" >
+      </testcase>
+      <testcase name="test_unknown_or_malformed_records_do_not_decode" assertions="3" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.001657" >
+      </testcase>
+      <testcase name="test_command_result_round_trip" assertions="3" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.002243" >
+      </testcase>
+      <testcase name="test_replay_high_water_survives_cache_eviction" assertions="7" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.001534" >
+      </testcase>
+      <testcase name="test_epoch_retirement_makes_old_commands_stale" assertions="4" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.001847" >
+      </testcase>
+      <testcase name="test_failure_precedence_lists_every_m01_code_once" assertions="19" status="pass" classname="tests/unit/test_command_envelope.gd" time="0.001358" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_content_registry.gd" tests="10" failures="0" skipped="0" time="0.02862" >
+      <testcase name="test_manifest_validates_with_stable_id" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.002001" >
+      </testcase>
+      <testcase name="test_all_fifteen_crops_match_frs" assertions="136" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004688" >
+      </testcase>
+      <testcase name="test_wheat_and_corn_exact_microseconds" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.0019" >
+      </testcase>
+      <testcase name="test_research_rows_and_gates" assertions="85" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004004" >
+      </testcase>
+      <testcase name="test_wheat_is_the_only_start_unlock" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001901" >
+      </testcase>
+      <testcase name="test_skills_and_point_capacity" assertions="5" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001463" >
+      </testcase>
+      <testcase name="test_returned_definitions_are_copies" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001862" >
+      </testcase>
+      <testcase name="test_registry_is_isolated_from_later_manifest_edits" assertions="2" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004553" >
+      </testcase>
+      <testcase name="test_unknown_lookups_return_null" assertions="4" status="pass" classname="tests/unit/test_content_registry.gd" time="0.001843" >
+      </testcase>
+      <testcase name="test_manifest_catalog_registers_and_resolves" assertions="7" status="pass" classname="tests/unit/test_content_registry.gd" time="0.004405" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_deep_clone.gd" tests="7" failures="0" skipped="0" time="0.089636" >
+      <testcase name="test_rich_state_is_valid_and_round_trips_losslessly" assertions="7" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.013729" >
+      </testcase>
+      <testcase name="test_v07_mutating_every_nested_container_leaves_source_unchanged" assertions="46" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.057117" >
+      </testcase>
+      <testcase name="test_v07_no_shared_object_references" assertions="13" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.003327" >
+      </testcase>
+      <testcase name="test_exported_primitives_contain_no_typed_containers" assertions="1" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.001838" >
+      </testcase>
+      <testcase name="test_v12_settings_never_persist_debug_speed" assertions="5" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.001961" >
+      </testcase>
+      <testcase name="test_gameplay_and_metadata_projections_are_disjoint_and_complete" assertions="6" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.003733" >
+      </testcase>
+      <testcase name="test_strict_decoder_rejects_malformed_snapshots" assertions="11" status="pass" classname="tests/unit/test_deep_clone.gd" time="0.007931" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_identity.gd" tests="7" failures="0" skipped="0" time="0.011999" >
+      <testcase name="test_entity_id_equality_uses_all_components" assertions="5" status="pass" classname="tests/unit/test_identity.gd" time="0.001262" >
+      </testcase>
+      <testcase name="test_entity_id_round_trips_at_int64_bounds" assertions="6" status="pass" classname="tests/unit/test_identity.gd" time="0.002037" >
+      </testcase>
+      <testcase name="test_malformed_entity_ids_are_rejected" assertions="10" status="pass" classname="tests/unit/test_identity.gd" time="0.001344" >
+      </testcase>
+      <testcase name="test_command_id_round_trip_and_rejection" assertions="3" status="pass" classname="tests/unit/test_identity.gd" time="0.001798" >
+      </testcase>
+      <testcase name="test_allocation_uses_state_namespace_and_increments" assertions="4" status="pass" classname="tests/unit/test_identity.gd" time="0.001502" >
+      </testcase>
+      <testcase name="test_allocation_at_limit_fails_without_drift" assertions="4" status="pass" classname="tests/unit/test_identity.gd" time="0.001917" >
+      </testcase>
+      <testcase name="test_new_namespace_keeps_existing_entity_ids" assertions="5" status="pass" classname="tests/unit/test_identity.gd" time="0.002139" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_integer_math.gd" tests="9" failures="0" skipped="0" time="0.047245" >
+      <testcase name="test_add_and_sub_limits" assertions="20" status="pass" classname="tests/unit/test_integer_math.gd" time="0.002072" >
+      </testcase>
+      <testcase name="test_mul_limits_all_sign_cases" assertions="24" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001567" >
+      </testcase>
+      <testcase name="test_floor_and_ceil_div_with_negatives" assertions="50" status="pass" classname="tests/unit/test_integer_math.gd" time="0.002353" >
+      </testcase>
+      <testcase name="test_mul_div_matches_oracle_including_overflowing_intermediates" assertions="568" status="pass" classname="tests/unit/test_integer_math.gd" time="0.008903" >
+      </testcase>
+      <testcase name="test_small_remainder_product_exhaustive" assertions="1" status="pass" classname="tests/unit/test_integer_math.gd" time="0.025543" >
+      </testcase>
+      <testcase name="test_mul_div_rejects_invalid_operands" assertions="6" status="pass" classname="tests/unit/test_integer_math.gd" time="0.00145" >
+      </testcase>
+      <testcase name="test_basis_point_rounding_rules" assertions="6" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001895" >
+      </testcase>
+      <testcase name="test_growth_duration_cap_and_minimum" assertions="16" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001525" >
+      </testcase>
+      <testcase name="test_increasing_increment_recurrence" assertions="8" status="pass" classname="tests/unit/test_integer_math.gd" time="0.001937" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_invalid_content.gd" tests="24" failures="0" skipped="0" time="0.106043" >
+      <testcase name="test_null_manifest" assertions="2" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.001272" >
+      </testcase>
+      <testcase name="test_empty_manifest_id" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00444" >
+      </testcase>
+      <testcase name="test_duplicate_crop_id" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004879" >
+      </testcase>
+      <testcase name="test_invalid_crop_id_format" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.006266" >
+      </testcase>
+      <testcase name="test_nonpositive_duration" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00549" >
+      </testcase>
+      <testcase name="test_negative_value" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005275" >
+      </testcase>
+      <testcase name="test_basic_crop_with_seed_cost" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005072" >
+      </testcase>
+      <testcase name="test_unknown_crop_class" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003802" >
+      </testcase>
+      <testcase name="test_stage_reference_count" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005442" >
+      </testcase>
+      <testcase name="test_empty_stage_reference" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005714" >
+      </testcase>
+      <testcase name="test_level_gate_out_of_range" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00517" >
+      </testcase>
+      <testcase name="test_missing_research_reference" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.004345" >
+      </testcase>
+      <testcase name="test_research_unlocking_another_crop" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005997" >
+      </testcase>
+      <testcase name="test_research_for_unknown_crop" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003935" >
+      </testcase>
+      <testcase name="test_research_nonpositive_duration" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.005445" >
+      </testcase>
+      <testcase name="test_start_unlock_unknown_or_researched" assertions="8" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.008736" >
+      </testcase>
+      <testcase name="test_crop_without_research_must_be_start_unlocked" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00414" >
+      </testcase>
+      <testcase name="test_curve_level_one_not_zero" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.001857" >
+      </testcase>
+      <testcase name="test_curve_not_strictly_increasing" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.002904" >
+      </testcase>
+      <testcase name="test_curve_continuation_invalid" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.001981" >
+      </testcase>
+      <testcase name="test_missing_curve" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.002458" >
+      </testcase>
+      <testcase name="test_skill_missing_prerequisite" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003637" >
+      </testcase>
+      <testcase name="test_skill_prerequisite_cycle" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.00404" >
+      </testcase>
+      <testcase name="test_duplicate_skill" assertions="4" status="pass" classname="tests/unit/test_invalid_content.gd" time="0.003746" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_level_curve.gd" tests="8" failures="0" skipped="0" time="0.019906" >
+      <testcase name="test_registry_is_valid" assertions="1" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001719" >
+      </testcase>
+      <testcase name="test_all_representable_thresholds_match_oracle" assertions="351" status="pass" classname="tests/unit/test_level_curve.gd" time="0.006129" >
+      </testcase>
+      <testcase name="test_explicit_table_is_frs_section_5_1_unchanged" assertions="31" status="pass" classname="tests/unit/test_level_curve.gd" time="0.002625" >
+      </testcase>
+      <testcase name="test_option_b_vectors_31_to_40" assertions="10" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001491" >
+      </testcase>
+      <testcase name="test_closed_form_adversary_does_not_match" assertions="2" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001982" >
+      </testcase>
+      <testcase name="test_below_at_above_every_explicit_threshold" assertions="87" status="pass" classname="tests/unit/test_level_curve.gd" time="0.002544" >
+      </testcase>
+      <testcase name="test_below_at_above_30_to_35" assertions="12" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001948" >
+      </testcase>
+      <testcase name="test_lookup_at_representation_boundary" assertions="8" status="pass" classname="tests/unit/test_level_curve.gd" time="0.001468" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_maturity_harvest.gd" tests="11" failures="0" skipped="0" time="0.035394" >
+      <testcase name="test_v02_wheat_exact_maturity_boundary" assertions="7" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.00348" >
+      </testcase>
+      <testcase name="test_derived_stage_boundaries" assertions="11" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.002798" >
+      </testcase>
+      <testcase name="test_v02_harvest_pays_snapshot_once" assertions="13" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.003791" >
+      </testcase>
+      <testcase name="test_v02_corn_fixture" assertions="5" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.001677" >
+      </testcase>
+      <testcase name="test_ready_crop_never_spoils_or_accrues" assertions="4" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.002189" >
+      </testcase>
+      <testcase name="test_growing_crop_cannot_be_harvested" assertions="4" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.002832" >
+      </testcase>
+      <testcase name="test_old_cycle_id_cannot_harvest_replacement" assertions="6" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.004344" >
+      </testcase>
+      <testcase name="test_other_harvest_rejections" assertions="9" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.006738" >
+      </testcase>
+      <testcase name="test_stale_maturity_events_are_ignored" assertions="5" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.002193" >
+      </testcase>
+      <testcase name="test_early_maturity_event_is_ignored" assertions="3" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.001466" >
+      </testcase>
+      <testcase name="test_wallet_overflow_on_harvest_is_atomic" assertions="5" status="pass" classname="tests/unit/test_maturity_harvest.gd" time="0.003886" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_new_game_state.gd" tests="11" failures="0" skipped="0" time="0.025609" >
+      <testcase name="test_new_game_is_valid" assertions="1" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001649" >
+      </testcase>
+      <testcase name="test_v01_plots_ids_and_unlocks" assertions="130" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.004878" >
+      </testcase>
+      <testcase name="test_v01_player_baseline" assertions="9" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.002001" >
+      </testcase>
+      <testcase name="test_v01_identity_and_counters" assertions="9" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.002366" >
+      </testcase>
+      <testcase name="test_g3_budget_defaults_are_inert" assertions="3" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001588" >
+      </testcase>
+      <testcase name="test_v11_fixed_eight_column_coordinates" assertions="70" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.004457" >
+      </testcase>
+      <testcase name="test_v11_hole_bearing_unlock_is_rejected" assertions="1" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001465" >
+      </testcase>
+      <testcase name="test_v11_contiguous_expansion_is_valid" assertions="9" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.002378" >
+      </testcase>
+      <testcase name="test_unlock_count_below_24_is_rejected" assertions="1" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001386" >
+      </testcase>
+      <testcase name="test_locked_plot_cannot_hold_a_cycle" assertions="1" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001928" >
+      </testcase>
+      <testcase name="test_scattered_occupancy_is_valid" assertions="1" status="pass" classname="tests/unit/test_new_game_state.gd" time="0.001513" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_plant_command.gd" tests="10" failures="0" skipped="0" time="0.044263" >
+      <testcase name="test_plant_wheat_from_new_game" assertions="16" status="pass" classname="tests/unit/test_plant_command.gd" time="0.002625" >
+      </testcase>
+      <testcase name="test_plant_corn_debits_seed_cost" assertions="5" status="pass" classname="tests/unit/test_plant_command.gd" time="0.001738" >
+      </testcase>
+      <testcase name="test_independent_plots" assertions="3" status="pass" classname="tests/unit/test_plant_command.gd" time="0.002138" >
+      </testcase>
+      <testcase name="test_rejections_leave_state_unchanged" assertions="35" status="pass" classname="tests/unit/test_plant_command.gd" time="0.0109" >
+      </testcase>
+      <testcase name="test_level_gate_applies_even_with_research" assertions="5" status="pass" classname="tests/unit/test_plant_command.gd" time="0.003222" >
+      </testcase>
+      <testcase name="test_unknown_crop_precedes_locked_plot" assertions="5" status="pass" classname="tests/unit/test_plant_command.gd" time="0.002658" >
+      </testcase>
+      <testcase name="test_insufficient_coins" assertions="5" status="pass" classname="tests/unit/test_plant_command.gd" time="0.003219" >
+      </testcase>
+      <testcase name="test_changed_terms_are_rejected_without_charge" assertions="30" status="pass" classname="tests/unit/test_plant_command.gd" time="0.009077" >
+      </testcase>
+      <testcase name="test_stale_terms_precede_insufficient_coins" assertions="5" status="pass" classname="tests/unit/test_plant_command.gd" time="0.003221" >
+      </testcase>
+      <testcase name="test_numeric_limit_rejects_without_partial_mutation" assertions="15" status="pass" classname="tests/unit/test_plant_command.gd" time="0.005465" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_planting_quotes.gd" tests="6" failures="0" skipped="0" time="0.012282" >
+      <testcase name="test_wheat_base_quote" assertions="3" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.00194" >
+      </testcase>
+      <testcase name="test_corn_base_quote" assertions="1" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.001373" >
+      </testcase>
+      <testcase name="test_identity_modifiers_reproduce_every_definition" assertions="15" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.003902" >
+      </testcase>
+      <testcase name="test_modifier_inputs_follow_rounding_rules" assertions="6" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.001723" >
+      </testcase>
+      <testcase name="test_invalid_modifier_inputs_fail" assertions="2" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.001837" >
+      </testcase>
+      <testcase name="test_completed_cycle_profit_from_snapshot" assertions="2" status="pass" classname="tests/unit/test_planting_quotes.gd" time="0.001507" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_progression.gd" tests="8" failures="0" skipped="0" time="0.018701" >
+      <testcase name="test_below_at_above_first_threshold" assertions="8" status="pass" classname="tests/unit/test_progression.gd" time="0.002005" >
+      </testcase>
+      <testcase name="test_multi_level_award_grants_every_point_once" assertions="5" status="pass" classname="tests/unit/test_progression.gd" time="0.001543" >
+      </testcase>
+      <testcase name="test_every_explicit_threshold_crossing_from_below" assertions="87" status="pass" classname="tests/unit/test_progression.gd" time="0.005806" >
+      </testcase>
+      <testcase name="test_option_b_crossings_30_to_35" assertions="7" status="pass" classname="tests/unit/test_progression.gd" time="0.00152" >
+      </testcase>
+      <testcase name="test_surplus_points_persist_after_all_ranks_full" assertions="3" status="pass" classname="tests/unit/test_progression.gd" time="0.002385" >
+      </testcase>
+      <testcase name="test_max_representable_xp_maps_to_level_349" assertions="3" status="pass" classname="tests/unit/test_progression.gd" time="0.001421" >
+      </testcase>
+      <testcase name="test_xp_overflow_fails_with_nothing_to_apply" assertions="3" status="pass" classname="tests/unit/test_progression.gd" time="0.002132" >
+      </testcase>
+      <testcase name="test_harvest_crossing_levels_emits_level_gained" assertions="5" status="pass" classname="tests/unit/test_progression.gd" time="0.001889" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_scheduler_ordering.gd" tests="8" failures="0" skipped="0" time="0.030252" >
+      <testcase name="test_each_tuple_field_orders_independently" assertions="5" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.001991" >
+      </testcase>
+      <testcase name="test_entity_order_is_numeric_not_uuid_lexical" assertions="1" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.001444" >
+      </testcase>
+      <testcase name="test_pop_order_is_independent_of_push_permutation" assertions="804" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.016387" >
+      </testcase>
+      <testcase name="test_pop_at_returns_all_events_at_one_time_in_order" assertions="4" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.001495" >
+      </testcase>
+      <testcase name="test_duplicate_insertion_sequence_is_rejected" assertions="3" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.001801" >
+      </testcase>
+      <testcase name="test_cancellation_and_bounded_storage" assertions="98" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.002088" >
+      </testcase>
+      <testcase name="test_rebuild_reproduces_identical_keys_and_order" assertions="3" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.003625" >
+      </testcase>
+      <testcase name="test_rebuild_skips_ready_cycles" assertions="1" status="pass" classname="tests/unit/test_scheduler_ordering.gd" time="0.001421" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_simulation_clock.gd" tests="9" failures="0" skipped="0" time="0.01558" >
+      <testcase name="test_speed_range_and_reset" assertions="10" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001892" >
+      </testcase>
+      <testcase name="test_v06_480_game_seconds_at_1x_equals_8_real_seconds_at_60x" assertions="4" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001507" >
+      </testcase>
+      <testcase name="test_partitioned_intervals_equal_one_combined_interval" assertions="1" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001868" >
+      </testcase>
+      <testcase name="test_suspended_and_offline_are_1x_despite_debug_speed" assertions="3" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001336" >
+      </testcase>
+      <testcase name="test_trs_trace_10s_at_60x_plus_1h_suspended" assertions="7" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.002026" >
+      </testcase>
+      <testcase name="test_v06_utc_rollback_and_jump_do_not_change_active_delta" assertions="4" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001432" >
+      </testcase>
+      <testcase name="test_overflow_and_negative_input_change_nothing" assertions="9" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.00188" >
+      </testcase>
+      <testcase name="test_anchor_interval_summary_is_bounded" assertions="77" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001687" >
+      </testcase>
+      <testcase name="test_v12_provider_exposes_active_suspended_partition" assertions="4" status="pass" classname="tests/unit/test_simulation_clock.gd" time="0.001952" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_smoke.gd" tests="1" failures="0" skipped="0" time="0.001273" >
+      <testcase name="test_runner_executes_typed_test" assertions="1" status="pass" classname="tests/unit/test_smoke.gd" time="0.001273" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/test_state_validation.gd" tests="17" failures="0" skipped="0" time="0.029237" >
+      <testcase name="test_level_must_match_xp" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001922" >
+      </testcase>
+      <testcase name="test_negative_wallet" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001366" >
+      </testcase>
+      <testcase name="test_points_must_be_conserved" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001932" >
+      </testcase>
+      <testcase name="test_unknown_skill_and_rank_range" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001443" >
+      </testcase>
+      <testcase name="test_skill_prerequisite_and_level_gate" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001988" >
+      </testcase>
+      <testcase name="test_av003_01_level7_auto_replant_profile_is_valid_on_its_manifest" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001417" >
+      </testcase>
+      <testcase name="test_state_bound_to_another_manifest_is_not_validated_with_this_registry" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001851" >
+      </testcase>
+      <testcase name="test_cycle_identity_collision_and_foreign_ids" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001464" >
+      </testcase>
+      <testcase name="test_cycle_timing_invariants" assertions="3" status="pass" classname="tests/unit/test_state_validation.gd" time="0.002033" >
+      </testcase>
+      <testcase name="test_cycle_unknown_crop_and_plot_mismatch" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001424" >
+      </testcase>
+      <testcase name="test_duplicate_insertion_sequence" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.002108" >
+      </testcase>
+      <testcase name="test_selected_crop_must_exist" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001625" >
+      </testcase>
+      <testcase name="test_schema_and_save_identity" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.00207" >
+      </testcase>
+      <testcase name="test_replay_state_invariants" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001361" >
+      </testcase>
+      <testcase name="test_unknown_research_reference" assertions="1" status="pass" classname="tests/unit/test_state_validation.gd" time="0.00189" >
+      </testcase>
+      <testcase name="test_settings_and_budget_ranges" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001379" >
+      </testcase>
+      <testcase name="test_anchor_intervals_are_bounded_and_1x_outside_active" assertions="2" status="pass" classname="tests/unit/test_state_validation.gd" time="0.001964" >
+      </testcase>
+  </testsuite>
+</testsuites>

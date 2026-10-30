@@ -68,3 +68,42 @@ static func has_code(errors: PackedStringArray, code: String) -> bool:
 		if error.begins_with(code + ":"):
 			return true
 	return false
+
+
+## Makes `crop_id` plantable: completes its research (if any) and raises XP to its level gate.
+static func unlock_crop(state: GameState, crop_id: String) -> void:
+	var crop: CropDefinition = registry().crop(crop_id)
+	if not crop.research_id.is_empty() and not state.research.completed.has(crop.research_id):
+		state.research.completed.append(crop.research_id)
+		state.research.completed.sort()
+	if state.player.level < crop.required_level:
+		set_xp(state, registry().threshold_for_level(crop.required_level))
+
+
+## Accepted PlantCrop at the state's current time, carrying the current quote's exact terms.
+static func plant_cmd(state: GameState, plot_id: int, crop_id: String, counter: int = 1) -> PlantCropCommand:
+	var q: PlantingQuote = FarmSystem.quote_for(state, registry(), crop_id)
+	return PlantCropCommand.new(CommandId.new(state.save_id, state.command_replay.current_epoch, counter),
+		state.simulation_time_us, counter, plot_id, crop_id, state.content_version, q.seed_cost, q.growth_us,
+		q.gross_coins, q.xp)
+
+
+## Accepted HarvestCrop naming the plot's current cycle.
+static func harvest_cmd(state: GameState, plot_id: int, counter: int = 2) -> HarvestCropCommand:
+	var cycle: CropCycle = state.plot(plot_id).crop_cycle
+	return HarvestCropCommand.new(CommandId.new(state.save_id, state.command_replay.current_epoch, counter),
+		state.simulation_time_us, counter, plot_id, cycle.cycle_id if cycle != null else null)
+
+
+## Minimal stand-in for the S4 engine advance: fires due maturity events in key order, then sets
+## the target time. Returns the emitted CropMatured events.
+static func advance(state: GameState, scheduler: EventScheduler, target_us: int) -> Array[SimulationEvent]:
+	var emitted: Array[SimulationEvent] = []
+	while scheduler.peek_time() != -1 and scheduler.peek_time() <= target_us:
+		var event: ScheduledEvent = scheduler.pop_next()
+		state.simulation_time_us = event.time_us
+		var outcome: SimulationEvent = FarmSystem.mark_mature(state, event)
+		if outcome != null:
+			emitted.append(outcome)
+	state.simulation_time_us = target_us
+	return emitted

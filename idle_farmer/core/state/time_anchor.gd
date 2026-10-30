@@ -11,6 +11,30 @@ var anomaly_count: int = 0
 var intervals: Array[AccountedInterval] = []
 
 
+## Credits an accounted interval: the anchor advances by real elapsed time only (never by
+## debug-scaled time or by an observed UTC value). Oldest summaries are compacted past the bound.
+## Returns false, changing nothing, if the anchor would overflow.
+func credit(interval: AccountedInterval) -> bool:
+	if interval == null or not interval.validate().is_empty():
+		return false
+	var next: MathResult = IntegerMath.add(credited_through_utc_us, interval.real_us)
+	if not next.ok:
+		return false
+	credited_through_utc_us = next.value
+	intervals.append(interval)
+	while intervals.size() > MAX_INTERVALS:
+		intervals.pop_front()
+	return true
+
+
+## Records a wall-clock observation for diagnostics. A UTC value behind the anchor counts as an
+## anomaly; the anchor itself never moves backward and is never set from observed UTC.
+func observe_utc(utc_us: int) -> void:
+	if utc_us < credited_through_utc_us:
+		anomaly_count += 1
+	last_observed_utc_us = maxi(0, utc_us)
+
+
 func validate() -> PackedStringArray:
 	var errors: PackedStringArray = PackedStringArray()
 	if credited_through_utc_us < 0 or last_observed_utc_us < 0 or anomaly_count < 0:
