@@ -76,10 +76,10 @@ When these conditions are met, the assessment can become **Ready with Conditions
 
 ## Delivered audit package
 
-- [PreDevelopment_Audit_Report.md](C:/_/IdleFarmer/docs/audit/PreDevelopment_Audit_Report.md) — all 8 classified findings, evidence, feasibility and source fingerprints.
-- [Requirements_Traceability_Matrix.md](C:/_/IdleFarmer/docs/audit/Requirements_Traceability_Matrix.md) — all 27 decision chains, non-decision coverage, 30 source tests and 101-task reverse map.
-- [Design_Validation_Scenarios.md](C:/_/IdleFarmer/docs/audit/Design_Validation_Scenarios.md) —34 scenarios and independent economic/progression calculations, with future tests clearly distinguished.
-- [PreDevelopment_Readiness.md](C:/_/IdleFarmer/docs/audit/PreDevelopment_Readiness.md) — this standalone decision summary and M01 entry conditions.
+- [PreDevelopment_Audit_Report.md](C:/_/IdleFarmer/docs/audit/round_01/PreDevelopment_Audit_Report.md) — all 8 classified findings, evidence, feasibility and source fingerprints.
+- [Requirements_Traceability_Matrix.md](C:/_/IdleFarmer/docs/audit/round_01/Requirements_Traceability_Matrix.md) — all 27 decision chains, non-decision coverage, 30 source tests and 101-task reverse map.
+- [Design_Validation_Scenarios.md](C:/_/IdleFarmer/docs/audit/round_01/Design_Validation_Scenarios.md) —34 scenarios and independent economic/progression calculations, with future tests clearly distinguished.
+- [PreDevelopment_Readiness.md](C:/_/IdleFarmer/docs/audit/round_01/PreDevelopment_Readiness.md) — this standalone decision summary and M01 entry conditions.
 
 ## A1 current readiness reassessment — 2026-10-28
 
@@ -105,3 +105,7 @@ When these conditions are met, the assessment can become **Ready with Conditions
 - [ ] At M01-T01, verify selected actual artifacts/checksums/licenses/runner behavior before adopting them; later SQLite/native adoption remains M03.
 
 **Correction order completed in documentation:** 001/002 identity and outcome boundaries →003 profile context →004 accepted terms →005/006/007 allocator/content/group detail →008 operative wording →009 exact audit evidence → traceability/fingerprints/Applied status. Current runtime acceptance remains the existing milestone sequence. The original findings, source baseline fingerprints and unsatisfied human/performance evidence are preserved; no blanket release-readiness claim is made.
+
+## R2-C1 navigation amendment — 2026-10-29
+
+The four Delivered audit package links above now target their existing round_01 locations. The original assessment and dated A1 reassessment remain historical evidence; their counts and technical claims were not rewritten. Current post-correction readiness, M01-T01's Not Yet Verified gate and later unvalidated obligations are in the [Round 2 readiness addendum](../round_02/R2_Development_Readiness.md#post-correction-readiness-addendum--r2-c1-2026-10-29) and [R2 correction changelog](../round_02/R2_Correction_Changelog.md).
