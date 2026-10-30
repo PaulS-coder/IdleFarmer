@@ -1,0 +1,129 @@
+== Engine.get_license_text()
+Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md).
+Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+== Engine.get_copyright_info() components
+Godot Engine: Expat
+Bullet Continuous Collision Detection and Physics Library: Expat and Zlib, Expat and Zlib, Expat and Zlib
+Linux AppStream Metadata File: CC0-1.0
+Godot Engine logo: CC-BY-4.0
+Betsy: Expat
+Chipmunk2D Joint Constraints: Expat
+Open Dynamics Engine: BSD-3-clause
+Jolt Physics: Expat, Expat
+Joint Non-Local Means (JNLM) denoiser: Expat
+The Android Open Source Project: Apache-2.0
+ProcessPhoenix: Apache-2.0
+Robert Penner's Easing Functions: Expat
+NVidia's FXAA 3.11, simplified by Simon Rodriguez: BSD-3-clause and Expat
+Intel ASSAO and related files: Expat
+Temporal Anti-Aliasing resolve implementation: Expat
+Subpixel Morphological Antialiasing: Expat
+AccessKit: Expat
+AMD FidelityFX Super Resolution: Expat
+AMD FidelityFX Super Resolution 2: Expat
+ANGLE: BSD-3-clause
+Arm ASTC Encoder: Apache-2.0
+Basis Universal: Apache-2.0
+Brotli: Expat
+CA certificates: MPL-2.0
+Clipper2: BSL-1.0
+Convection Texture Tools Stand-Alone Kernels: Expat
+D3D12 Memory Allocator: Expat
+DirectX Headers: Expat
+doctest: Expat
+dr_libs: Unlicense or MIT-0
+Embree: Apache-2.0
+ENet: Expat
+etcpak: BSD-3-clause
+DroidSans font: Apache-2.0
+Inter font: OFL-1.1
+JetBrains Mono font: OFL-1.1
+Noto Sans font: OFL-1.1
+Open Sans font: OFL-1.1
+Vazirmatn font: OFL-1.1
+The FreeType Project: FTL
+GamepadMotionHelpers: Expat
+glad: CC0-1.0 and Apache-2.0
+glslang: glslang
+Graphite engine: Expat
+Grisu2 float serialization algorithm: Expat and Apache-2.0
+HarfBuzz text shaping library: HarfBuzz
+International Components for Unicode: Unicode
+libbacktrace: BSD-3-clause
+libjpeg-turbo: BSD-3-clause and IJG
+KTX: Apache-2.0
+OggVorbis: BSD-3-clause, BSD-3-clause
+libpng: Zlib
+OggTheora: BSD-3-clause
+WebP codec: BSD-3-clause
+Manifold: Apache-2.0
+Mbed TLS: Apache-2.0
+meshoptimizer: Expat
+metal-cpp: Apache-2.0
+mingw-std-threads: BSD-2-clause
+MiniUPnP Project: BSD-3-clause
+MiniZip: Zlib
+bcdec: Expat
+Fast Filtering of Reflection Probes: Expat
+FastLZ: Expat
+FastNoise Lite: Expat
+libjingle: BSD-3-clause
+Tangent Space Normal Maps implementation: Zlib
+NVIDIA NVAPI (minimal excerpt): Expat
+OK Lab color space: Expat
+Minimal PCG32 implementation: Apache-2.0
+PolyPartition / Triangulator: Expat
+Quite OK Audio Format: Expat
+r128 library: Unlicense
+SMAZ: BSD-3-clause
+SMOL-V: Unlicense or Expat
+stb libraries: Unlicense or Expat
+YUV2RGB: BSD-2-clause
+Multi-channel signed distance field generator: Expat
+OpenXR Loader: Apache-2.0
+PCRE2: BSD-3-clause
+Recast: Zlib
+RVO2: Apache-2.0
+SDL: Zlib
+hidapi: BSD-3-clause
+SPIRV-Cross: Apache-2.0 or Expat
+SPIRV-Headers: Expat
+SPIRV-Reflect: Apache-2.0
+Swappy: Apache-2.0
+ThorVG: Expat
+TinyEXR: BSD-3-clause
+ufbx: Expat
+V-HACD: BSD-3-clause
+volk: Expat
+Vulkan Headers: Apache-2.0
+Vulkan Memory Allocator: Expat
+Wayland core protocol: Expat
+Wayland protocols: Expat
+Mesa Wayland protocols: X11
+Wslay: Expat
+xatlas: Expat
+zlib: Zlib
+Zstandard: BSD-3-clause
+== Engine.get_license_info() keys
+Apache-2.0, BSD-2-clause, BSD-3-clause, BSL-1.0, CC0-1.0, CC-BY-4.0, Expat, glslang, FTL, HarfBuzz, IJG, MPL-2.0, MIT-0, OFL-1.1, Unicode, Unlicense, WOL, X11, Zlib
+== renderer/audio
+rendering_method=gl_compatibility audio_driver=Dummy display=headless
