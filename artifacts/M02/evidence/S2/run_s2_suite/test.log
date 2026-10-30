@@ -1,0 +1,452 @@
+﻿Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [C:/Users/pslep/AppData/Roaming/Godot/app_userdata/Idle Farmer] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/architecture/test_core_dependencies.gd
+* test_audit_covers_all_expected_modules
+* test_every_core_and_data_script_parses
+* test_no_forbidden_dependencies
+* test_resource_base_class_only_for_content_definitions
+* test_every_core_class_is_refcounted_or_content_resource
+5/5 passed.
+
+
+res://tests/architecture/test_headless_boot.gd
+* test_runner_environment_is_headless
+* test_core_boot_and_play_create_no_nodes
+2/2 passed.
+
+
+res://tests/architecture/test_serialization_coverage.gd
+* test_every_record_field_is_serialized
+* test_immutable_records_round_trip_all_accessors
+2/2 passed.
+
+
+res://tests/simulation/test_commit_outcomes.gd
+* test_av002_01_lost_receipt_blocks_until_read_back_adopts_revision
+* test_av002_02_definite_rollback_and_unreadable_state
+* test_definite_not_committed_is_discarded_and_not_cached
+* test_unknown_on_time_only_checkpoint_blocks_and_reconciles
+* test_av002_05_reconciled_run_equals_uninterrupted_run
+* test_checkpoint_cadence_never_changes_gameplay_ids
+* test_startup_unknown_blocks_until_reconciled
+7/7 passed.
+
+
+res://tests/simulation/test_controller_acceptance.gd
+* test_startup_commits_checkpoint_before_input
+* test_accepted_command_is_stamped_and_published_after_commit
+* test_av004_01_click_crossing_due_maturity
+* test_av004_02_stale_terms_are_rejected_without_charge
+* test_av004_05_duplicate_pending_intent_returns_recorded_result
+* test_v03_rejection_baseline_excludes_due_work
+* test_rejected_input_does_not_drift_gameplay_counters
+* test_manual_wheat_farming_from_actual_initial_state
+* test_speed_controls
+* test_restart_against_mismatched_durable_parent_is_refused
+* test_engine_never_touches_committed_state_directly
+11/11 passed.
+
+
+res://tests/simulation/test_engine_api.gd
+* test_initialize_rejects_invalid_or_unsupported_state
+* test_snapshot_is_an_independent_copy
+* test_advance_is_event_driven_and_sequences_batches
+* test_advance_backward_is_rejected_unchanged
+* test_same_timestamp_maturities_on_32_plots_terminate
+* test_due_events_precede_same_time_commands
+* test_accepted_time_must_equal_engine_time
+* test_malformed_envelope_precedes_time_check
+* test_duplicate_and_stale_commands_never_execute
+* test_v10_cache_eviction_never_permits_repayment
+* test_success_records_replay_mark_and_sequence
+11/11 passed.
+
+
+res://tests/simulation/test_manifest_binding.gd
+* test_av003_01_profile_keeps_its_manifest_when_another_moves_level_7
+* test_av003_02_unsupported_manifest_fails_without_overwrite
+* test_av003_02_lowered_thresholds_never_apply_implicitly
+* test_av003_03_point_conservation_across_modes_and_restart
+* test_av001_01_restore_under_fresh_epoch_allocates_new_identities
+5/5 passed.
+
+
+res://tests/simulation/test_purchases.gd
+* test_sequential_expansion_25_to_32
+* test_skipped_plot_fails_even_when_rich
+* test_failed_25_does_not_make_26_eligible
+* test_level_and_cost_are_joint_preconditions
+* test_v1_profile_cannot_expand
+* test_av006_01_02_every_rank_sequentially_from_level_1
+* test_deferred_and_unknown_families_rejected
+* test_av006_03_future_only_effects_with_quote_parity
+* test_controller_quotes_and_redelivery
+9/9 passed.
+
+
+res://tests/simulation/test_replay_equivalence.gd
+* test_t021_modes_are_equivalent_across_32_plots
+* test_v06_60x_reaches_the_same_state_in_one_sixtieth_real_time
+* test_c1_xp_crossings_30_31_32_35_are_mode_independent
+* test_engine_replay_of_accepted_log_matches_controller_run
+* test_scheduler_restore_mid_run_matches_uninterrupted_replay
+* test_v08_pending_queue_is_bounded_by_growing_cycles
+* test_av001_03_fixed_namespace_gives_identical_ids
+7/7 passed.
+
+
+res://tests/unit/test_big_int.gd
+* test_oracle_vectors
+* test_decimal_round_trip_and_normal_form
+* test_int64_round_trip_and_bounds
+* test_algebraic_properties
+* test_immutability
+5/5 passed.
+
+
+res://tests/unit/test_canonical_codec.gd
+* test_encoding_and_digest_match_independent_oracle
+* test_round_trip_is_lossless_at_int64_bounds
+* test_key_insertion_order_does_not_change_digest
+* test_digest_distinguishes_type_and_order
+* test_rejects_unsupported_values
+* test_decode_rejects_malformed_and_noncanonical_input
+6/6 passed.
+
+
+res://tests/unit/test_command_envelope.gd
+* test_commands_round_trip_through_replay_records
+* test_accepted_envelope_cannot_be_edited_through_accessors
+* test_envelope_well_formedness
+* test_unknown_or_malformed_records_do_not_decode
+* test_command_result_round_trip
+* test_replay_high_water_survives_cache_eviction
+* test_epoch_retirement_makes_old_commands_stale
+* test_failure_precedence_lists_every_m01_code_once
+8/8 passed.
+
+
+res://tests/unit/test_content_registry.gd
+* test_manifest_validates_with_stable_id
+* test_all_fifteen_crops_match_frs
+* test_wheat_and_corn_exact_microseconds
+* test_research_rows_and_gates
+* test_wheat_is_the_only_start_unlock
+* test_skills_and_point_capacity
+* test_returned_definitions_are_copies
+* test_registry_is_isolated_from_later_manifest_edits
+* test_unknown_lookups_return_null
+* test_manifest_catalog_registers_and_resolves
+10/10 passed.
+
+
+res://tests/unit/test_content_registry_v2.gd
+* test_v2_validates_with_its_own_id
+* test_v1_rows_are_unchanged_in_v2
+* test_skill_effects_match_frs
+* test_equipment_matches_frs
+* test_fertilizers_match_frs
+* test_expansion_bands_match_frs
+* test_economy_parameters
+* test_getters_return_copies
+* test_catalog_supports_both_manifests
+9/9 passed.
+
+
+res://tests/unit/test_deep_clone.gd
+* test_rich_state_is_valid_and_round_trips_losslessly
+* test_v07_mutating_every_nested_container_leaves_source_unchanged
+* test_v07_no_shared_object_references
+* test_exported_primitives_contain_no_typed_containers
+* test_v12_settings_never_persist_debug_speed
+* test_gameplay_and_metadata_projections_are_disjoint_and_complete
+* test_strict_decoder_rejects_malformed_snapshots
+7/7 passed.
+
+
+res://tests/unit/test_identity.gd
+* test_entity_id_equality_uses_all_components
+* test_entity_id_round_trips_at_int64_bounds
+* test_malformed_entity_ids_are_rejected
+* test_command_id_round_trip_and_rejection
+* test_allocation_uses_state_namespace_and_increments
+* test_allocation_at_limit_fails_without_drift
+* test_new_namespace_keeps_existing_entity_ids
+7/7 passed.
+
+
+res://tests/unit/test_integer_math.gd
+* test_add_and_sub_limits
+* test_mul_limits_all_sign_cases
+* test_floor_and_ceil_div_with_negatives
+* test_mul_div_matches_oracle_including_overflowing_intermediates
+* test_small_remainder_product_exhaustive
+* test_mul_div_rejects_invalid_operands
+* test_basis_point_rounding_rules
+* test_growth_duration_cap_and_minimum
+* test_increasing_increment_recurrence
+9/9 passed.
+
+
+res://tests/unit/test_invalid_content.gd
+* test_null_manifest
+* test_empty_manifest_id
+* test_duplicate_crop_id
+* test_invalid_crop_id_format
+* test_nonpositive_duration
+* test_negative_value
+* test_basic_crop_with_seed_cost
+* test_unknown_crop_class
+* test_stage_reference_count
+* test_empty_stage_reference
+* test_level_gate_out_of_range
+* test_missing_research_reference
+* test_research_unlocking_another_crop
+* test_research_for_unknown_crop
+* test_research_nonpositive_duration
+* test_start_unlock_unknown_or_researched
+* test_crop_without_research_must_be_start_unlocked
+* test_curve_level_one_not_zero
+* test_curve_not_strictly_increasing
+* test_curve_continuation_invalid
+* test_missing_curve
+* test_skill_missing_prerequisite
+* test_skill_prerequisite_cycle
+* test_duplicate_skill
+24/24 passed.
+
+
+res://tests/unit/test_invalid_content_v2.gd
+* test_incomplete_tables
+* test_deferred_families_rejected
+* test_upgrade_ranks_must_be_contiguous
+* test_upgrade_values
+* test_fertilizer_rules
+* test_expansion_bands
+* test_economy_ranges
+* test_skill_effect_rules
+8/8 passed.
+
+
+res://tests/unit/test_level_curve.gd
+* test_registry_is_valid
+* test_all_representable_thresholds_match_oracle
+* test_explicit_table_is_frs_section_5_1_unchanged
+* test_option_b_vectors_31_to_40
+* test_closed_form_adversary_does_not_match
+* test_below_at_above_every_explicit_threshold
+* test_below_at_above_30_to_35
+* test_lookup_at_representation_boundary
+8/8 passed.
+
+
+res://tests/unit/test_m02_carryover.gd
+* test_batch_append_keeps_first_failure
+* test_transaction_without_cycle_and_with_origin_round_trips
+* test_harvest_transactions_record_origin
+* test_replay_cache_entries_are_compact
+* test_command_factory_is_the_single_type_map
+5/5 passed.
+
+
+res://tests/unit/test_maturity_harvest.gd
+* test_v02_wheat_exact_maturity_boundary
+* test_derived_stage_boundaries
+* test_v02_harvest_pays_snapshot_once
+* test_v02_corn_fixture
+* test_ready_crop_never_spoils_or_accrues
+* test_growing_crop_cannot_be_harvested
+* test_old_cycle_id_cannot_harvest_replacement
+* test_other_harvest_rejections
+* test_stale_maturity_events_are_ignored
+* test_early_maturity_event_is_ignored
+* test_wallet_overflow_on_harvest_is_atomic
+11/11 passed.
+
+
+res://tests/unit/test_modifier_snapshot.gd
+* test_quotes_match_oracle
+* test_fertilizer_price_table
+* test_t004_tomatoes_basic
+* test_cap_and_waste
+* test_coin_bonuses_never_change_xp
+* test_snapshot_dict_keys
+* test_unknown_fertilizer_is_not_ok
+* test_av003_v1_profile_has_identity_modifiers
+8/8 passed.
+
+
+res://tests/unit/test_new_game_state.gd
+* test_new_game_is_valid
+* test_v01_plots_ids_and_unlocks
+* test_v01_player_baseline
+* test_v01_identity_and_counters
+* test_g3_budget_defaults_are_inert
+* test_v11_fixed_eight_column_coordinates
+* test_v11_hole_bearing_unlock_is_rejected
+* test_v11_contiguous_expansion_is_valid
+* test_unlock_count_below_24_is_rejected
+* test_locked_plot_cannot_hold_a_cycle
+* test_scattered_occupancy_is_valid
+11/11 passed.
+
+
+res://tests/unit/test_plant_command.gd
+* test_plant_wheat_from_new_game
+* test_plant_corn_debits_seed_cost
+* test_independent_plots
+* test_rejections_leave_state_unchanged
+* test_level_gate_applies_even_with_research
+* test_unknown_crop_precedes_locked_plot
+* test_insufficient_coins
+* test_changed_terms_are_rejected_without_charge
+* test_stale_terms_precede_insufficient_coins
+* test_numeric_limit_rejects_without_partial_mutation
+10/10 passed.
+
+
+res://tests/unit/test_plant_fertilizer.gd
+* test_tomatoes_with_basic
+* test_snapshot_survives_later_equipment_purchase
+* test_unknown_fertilizer
+* test_unknown_fertilizer_precedes_locked_plot
+* test_changed_fertilizer_terms_are_stale
+* test_insufficient_coins_covers_seed_plus_fertilizer
+* test_numeric_room_for_fertilizer_transaction
+* test_inconsistent_fertilizer_records_are_invalid
+* test_v1_profile_cannot_buy_v2_fertilizer
+* test_controller_round_trip_with_fertilizer
+10/10 passed.
+
+
+res://tests/unit/test_planting_quotes.gd
+* test_wheat_base_quote
+* test_corn_base_quote
+* test_identity_modifiers_reproduce_every_definition
+* test_modifier_inputs_follow_rounding_rules
+* test_invalid_modifier_inputs_fail
+* test_completed_cycle_profit_from_snapshot
+6/6 passed.
+
+
+res://tests/unit/test_progression.gd
+* test_below_at_above_first_threshold
+* test_multi_level_award_grants_every_point_once
+* test_every_explicit_threshold_crossing_from_below
+* test_option_b_crossings_30_to_35
+* test_surplus_points_persist_after_all_ranks_full
+* test_max_representable_xp_maps_to_level_349
+* test_xp_overflow_fails_with_nothing_to_apply
+* test_harvest_crossing_levels_emits_level_gained
+8/8 passed.
+
+
+res://tests/unit/test_rate_frontier.gd
+* test_matches_exhaustive_oracle
+* test_dvs010_named_outcomes
+* test_input_order_does_not_matter
+* test_negative_and_unaffordable_options_are_never_chosen
+4/4 passed.
+
+
+res://tests/unit/test_reset.gd
+* test_v05_reset_prices
+* test_t008_reset_preserves_everything_but_skills
+* test_nothing_to_reset_and_v1
+* test_av004_04_level_change_requires_refresh
+* test_av004_04_extra_income_never_raises_the_charge
+* test_changed_allocation_and_insufficient_coins
+6/6 passed.
+
+
+res://tests/unit/test_scheduler_ordering.gd
+* test_each_tuple_field_orders_independently
+* test_entity_order_is_numeric_not_uuid_lexical
+* test_pop_order_is_independent_of_push_permutation
+* test_pop_at_returns_all_events_at_one_time_in_order
+* test_duplicate_insertion_sequence_is_rejected
+* test_cancellation_and_bounded_storage
+* test_rebuild_reproduces_identical_keys_and_order
+* test_rebuild_skips_ready_cycles
+8/8 passed.
+
+
+res://tests/unit/test_simulation_clock.gd
+* test_speed_range_and_reset
+* test_v06_480_game_seconds_at_1x_equals_8_real_seconds_at_60x
+* test_partitioned_intervals_equal_one_combined_interval
+* test_suspended_and_offline_are_1x_despite_debug_speed
+* test_trs_trace_10s_at_60x_plus_1h_suspended
+* test_v06_utc_rollback_and_jump_do_not_change_active_delta
+* test_overflow_and_negative_input_change_nothing
+* test_anchor_interval_summary_is_bounded
+* test_v12_provider_exposes_active_suspended_partition
+9/9 passed.
+
+
+res://tests/unit/test_skill_rules.gd
+* test_v01_four_point_automation_by_level_7
+* test_automation_chain_requires_immediate_predecessor_and_level
+* test_v12_one_preceding_rank_is_enough_for_tier_entry
+* test_max_rank_points_and_unknown
+* test_stale_target_rank_and_redelivery
+* test_capabilities_are_derived_not_stored
+* test_growth_skills_feed_future_quotes
+7/7 passed.
+
+
+res://tests/unit/test_smoke.gd
+* test_runner_executes_typed_test
+1/1 passed.
+
+
+res://tests/unit/test_state_validation.gd
+* test_level_must_match_xp
+* test_negative_wallet
+* test_points_must_be_conserved
+* test_unknown_skill_and_rank_range
+* test_skill_prerequisite_and_level_gate
+* test_av003_01_level7_auto_replant_profile_is_valid_on_its_manifest
+* test_state_bound_to_another_manifest_is_not_validated_with_this_registry
+* test_cycle_identity_collision_and_foreign_ids
+* test_cycle_timing_invariants
+* test_cycle_unknown_crop_and_plot_mismatch
+* test_duplicate_insertion_sequence
+* test_selected_crop_must_exist
+* test_schema_and_save_identity
+* test_replay_state_invariants
+* test_unknown_research_reference
+* test_settings_and_budget_ranges
+* test_anchor_intervals_are_bounded_and_1x_outside_active
+17/17 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts              35
+Tests               281
+Passing Tests       281
+Asserts           10349
+Time              13.756s
+
+
+---- All tests passed! ----
+
+Results saved to C:\_\IdleFarmer\artifacts\M02\test_runs\20261030T061224Z\junit.xml
+
+--- stderr ---
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ff)
+
+

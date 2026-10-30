@@ -135,6 +135,12 @@ func validate(registry: ContentRegistry) -> PackedStringArray:
 	errors.append_array(_validate_plots(registry))
 	errors.append_array(_validate_research(registry))
 	errors.append_array(upgrades.validate())
+	for family_id: String in upgrades.ranks:
+		var rank: int = upgrades.ranks[family_id]
+		if registry.upgrade_max_rank(family_id) == 0:
+			errors.append("UPGRADE_UNKNOWN: '%s' is not defined by '%s'" % [family_id, content_version])
+		elif rank < 1 or rank > registry.upgrade_max_rank(family_id):
+			errors.append("UPGRADE_RANK_RANGE: '%s' rank %d" % [family_id, rank])
 	errors.append_array(research.validate())
 	errors.append_array(contracts.validate())
 	errors.append_array(automation.validate())

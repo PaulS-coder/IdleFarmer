@@ -109,6 +109,14 @@ func submit_command(command: GameCommand) -> CommandResult:
 			result = FarmSystem.plant(_state, _registry, _scheduler, command as PlantCropCommand)
 		GameCommand.TYPE_HARVEST_CROP:
 			result = FarmSystem.harvest(_state, _registry, command as HarvestCropCommand)
+		GameCommand.TYPE_PURCHASE_PLOT:
+			result = PurchaseSystem.purchase_plot(_state, _registry, command as PurchasePlotCommand)
+		GameCommand.TYPE_ALLOCATE_SKILL:
+			result = SkillSystem.allocate(_state, _registry, command as AllocateSkillCommand)
+		GameCommand.TYPE_RESET_SKILLS:
+			result = SkillSystem.reset(_state, _registry, command as ResetSkillsCommand)
+		GameCommand.TYPE_PURCHASE_UPGRADE:
+			result = PurchaseSystem.purchase_upgrade(_state, _registry, command as PurchaseUpgradeCommand)
 		_:
 			return CommandResult.failed(FailureCode.MALFORMED_ENVELOPE, "unsupported command type", id, _state.state_sequence)
 	if not result.success:

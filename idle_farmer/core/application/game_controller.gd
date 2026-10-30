@@ -108,8 +108,34 @@ func reset_speed() -> void:
 
 
 ## Planting quote against committed state, for UI confirmation (same calculation as execution).
-func quote_plant(crop_id: String) -> PlantingQuote:
-	return FarmSystem.quote_for(_committed, _catalog.resolve(_committed.content_version), crop_id)
+func quote_plant(crop_id: String, fertilizer_id: String = FertilizerDefinition.NONE_ID) -> PlantingQuote:
+	return FarmSystem.quote_for(_committed, _registry(), crop_id, fertilizer_id)
+
+
+## Purchase quotes for UI confirmation; each returns the exact terms an intent should carry
+## ({} when the purchase is not currently offered).
+func quote_plot_purchase() -> Dictionary:
+	return PurchaseSystem.quote_plot(_committed, _registry())
+
+
+func quote_upgrade(family_id: String) -> Dictionary:
+	return PurchaseSystem.quote_upgrade(_committed, _registry(), family_id)
+
+
+func quote_skill(skill_id: String) -> Dictionary:
+	return SkillSystem.quote_allocate(_committed, skill_id)
+
+
+func quote_reset() -> Dictionary:
+	return SkillSystem.quote_reset(_committed, _registry())
+
+
+func capabilities() -> Capabilities:
+	return Capabilities.of(_committed, _registry())
+
+
+func _registry() -> ContentRegistry:
+	return _catalog.resolve(_committed.content_version)
 
 
 ## Active foreground real time at the current debug speed.

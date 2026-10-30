@@ -6,6 +6,10 @@ extends RefCounted
 
 const TYPE_PLANT_CROP: String = "PlantCrop"
 const TYPE_HARVEST_CROP: String = "HarvestCrop"
+const TYPE_PURCHASE_PLOT: String = "PurchasePlot"
+const TYPE_ALLOCATE_SKILL: String = "AllocateSkill"
+const TYPE_RESET_SKILLS: String = "ResetSkills"
+const TYPE_PURCHASE_UPGRADE: String = "PurchaseUpgrade"
 
 var _command_id: CommandId
 var _type: String

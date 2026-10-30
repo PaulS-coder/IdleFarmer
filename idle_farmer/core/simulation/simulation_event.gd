@@ -8,6 +8,10 @@ const CROP_MATURED: String = "CropMatured"
 const CROP_HARVESTED: String = "CropHarvested"
 const LEVEL_GAINED: String = "LevelGained"
 const RESEARCH_COMPLETED: String = "ResearchCompleted"
+const PLOT_PURCHASED: String = "PlotPurchased"
+const SKILL_ALLOCATED: String = "SkillAllocated"
+const SKILLS_RESET: String = "SkillsReset"
+const UPGRADE_PURCHASED: String = "UpgradePurchased"
 
 var type: String
 var time_us: int

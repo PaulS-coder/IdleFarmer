@@ -11,7 +11,7 @@ func before_each() -> void:
 
 ## A state touching every record and container type, including extension stubs.
 func _rich_state() -> GameState:
-	var s: GameState = Fixtures.new_game()
+	var s: GameState = Fixtures.new_game_v2()
 	Fixtures.set_xp(s, 5_200)
 	s.player.skill_ranks = {"batch_planting": 1, "batch_harvesting": 1}
 	s.player.available_skill_points = 4
@@ -36,7 +36,7 @@ func _rich_state() -> GameState:
 
 
 func test_rich_state_is_valid_and_round_trips_losslessly() -> void:
-	assert_eq(state.validate(Fixtures.registry()), PackedStringArray())
+	assert_eq(state.validate(Fixtures.registry_v2()), PackedStringArray())
 	var copy: GameState = state.clone()
 	assert_not_null(copy)
 	assert_eq(copy.digest(), state.digest())

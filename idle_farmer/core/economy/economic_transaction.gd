@@ -7,10 +7,16 @@ extends RefCounted
 const TYPE_SEED_PURCHASE: String = "seed_purchase"
 const TYPE_HARVEST_CREDIT: String = "harvest_credit"
 const TYPE_FERTILIZER_PURCHASE: String = "fertilizer_purchase"
+const TYPE_PLOT_PURCHASE: String = "plot_purchase"
+const TYPE_UPGRADE_PURCHASE: String = "upgrade_purchase"
+const TYPE_SKILL_RESET: String = "skill_reset"
 
 const CATEGORY_SEEDS: String = "seeds"
 const CATEGORY_HARVEST: String = "harvest"
 const CATEGORY_FERTILIZER: String = "fertilizer"
+const CATEGORY_EXPANSION: String = "expansion"
+const CATEGORY_EQUIPMENT: String = "equipment"
+const CATEGORY_RESET: String = "reset"
 
 const ORIGIN_MANUAL: String = "manual"
 const ORIGIN_AUTOMATIC: String = "automatic"

@@ -125,3 +125,17 @@ static func advance(state: GameState, scheduler: EventScheduler, target_us: int)
 			emitted.append(outcome)
 	state.simulation_time_us = target_us
 	return emitted
+
+
+## Accepted command of `type` with `terms` at the state's current time (purchase-style commands).
+static func command(state: GameState, type: String, terms: Dictionary, counter: int = 1) -> GameCommand:
+	return CommandFactory.build(type, CommandId.new(state.save_id, state.command_replay.current_epoch, counter),
+		state.simulation_time_us, counter, terms)
+
+
+## Engine bound to `state` through the shared test catalog (v1 and v2).
+static func engine_for(state: GameState) -> SimulationEngine:
+	var engine: SimulationEngine = SimulationEngine.new()
+	var errors: PackedStringArray = engine.initialize(state, ManifestFixtures.catalog())
+	assert(errors.is_empty(), str(errors))
+	return engine
